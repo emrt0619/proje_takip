@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KULE RADAR — Komuta Merkezi</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Rajdhani:wght@500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              orbitron: ['Orbitron', 'sans-serif'],
+              rajdhani: ['Rajdhani', 'sans-serif'],
+              mono: ['Space Mono', 'monospace'],
+            },
+            colors: {
+              'slate-950': '#020617',
+            }
+          }
+        }
+      }
+    </script>
+    <style>
+        body {
+            background-color: #020617; /* slate-950 */
+            background-image: 
+                linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px);
+            background-size: 80px 80px;
+            overflow: hidden;
+            font-family: 'Rajdhani', sans-serif;
+        }
+
+        /* Progress Bar Animation */
+        @keyframes stripeAni { 0%{transform:translateX(0);} 100%{transform:translateX(28.3px);} }
+        .prog-stripes {
+            background: repeating-linear-gradient(-45deg, transparent, transparent 10px, rgba(255,255,255,0.15) 10px, rgba(255,255,255,0.15) 20px);
+            animation: stripeAni 1s linear infinite;
+        }
+
+        /* Slide Transitions */
+        .slide {
+            opacity: 0;
+            transition: opacity 0.8s ease-in-out;
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+        }
+        .slide.active { opacity: 1; pointer-events: auto; }
+
+        /* General Glow Util */
+        .glow-green { box-shadow: 0 0 20px rgba(0,255,136,0.5); }
+        .glow-cyan { box-shadow: 0 0 20px rgba(0,255,255,0.5); }
+        .glow-orange { box-shadow: 0 0 20px rgba(255,165,0,0.6); }
+        .pulse-warn { animation: pWarn 1.5s ease-in-out infinite; }
+        @keyframes pWarn { 0%, 100% { opacity: 1; text-shadow: 0 0 20px rgba(255,165,0,0.8); } 50% { opacity: 0.6; text-shadow: 0 0 10px rgba(255,165,0,0.4); } }
+        .pulse-crit { animation: pCrit 1s ease-in-out infinite; }
+        @keyframes pCrit { 0%, 100% { opacity: 1; text-shadow: 0 0 25px rgba(255,34,68,0.8); } 50% { opacity: 0.5; text-shadow: 0 0 10px rgba(255,34,68,0.4); } }
+
+        /* Nav Dot Active */
+        .nav-dot { transition: all 0.3s; }
+        .nav-dot.on { background-color: #00ffff; box-shadow: 0 0 10px #00ffff; width: 32px; }
+    </style>
+</head>
+<body class="h-screen w-screen text-white flex flex-col">
+
+    <!-- OVERLAYS (Vignette) -->
+    <div class="fixed inset-0 pointer-events-none z-50 bg-[radial-gradient(ellipse_at_center,transparent_50%,rgba(0,0,0,0.7)_100%)]"></div>
+
+    <header class="flex justify-between items-start w-full px-10 py-6 relative z-20 shrink-0">
+        <!-- Sol Üst: Logo ve İsim -->
+        <div class="flex flex-row items-center gap-4">
+            <img src="/static/img/logo.png" alt="Logo" class="w-16 h-16 object-contain drop-shadow-[0_0_10px_rgba(0,255,255,0.6)]" onerror="this.style.display='none'">
+            <div class="flex flex-col">
+                <span class="font-orbitron font-bold text-4xl text-cyan-400 tracking-widest drop-shadow-[0_0_8px_rgba(0,255,255,0.5)]">KULE RADAR</span>
+                <span class="font-mono text-sm text-slate-400 tracking-widest uppercase">DEEP TECH ORCHESTRA</span>
+            </div>
+        </div>
+        
+        <!-- Sağ Üst: Saat ve Tarih -->
+        <div class="flex flex-col items-end gap-3">
+            <div id="clock" class="font-orbitron text-5xl font-bold text-cyan-400 drop-shadow-[0_0_10px_rgba(0,255,255,0.4)]">00:00:00</div>
+            <div class="flex flex-row items-center gap-6">
+                <!-- Tarih Badge -->
+                <div id="cDate" class="font-mono text-xl bg-cyan-900/30 text-cyan-300 border border-cyan-500/50 px-4 py-1 tracking-widest rounded uppercase shadow-[0_0_10px_rgba(0,255,255,0.2)]">
+                    -- ---- ---- // ---------
+                </div>
+                <!-- Canlı Indicator -->
+                <div class="flex items-center gap-3 text-slate-100 font-mono text-xl">
+                    <div class="w-4 h-4 rounded-full bg-green-500 shadow-[0_0_10px_rgba(0,255,136,0.8)] animate-pulse"></div>
+                    CANLI
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="flex flex-row w-full flex-1 relative z-10 px-6 pb-6 gap-6 overflow-hidden">
+        
+        <!-- LEFT PANEL: PROJECT STAGE -->
+        <main class="flex-1 flex flex-col relative bg-black/20 p-12 overflow-hidden h-full rounded-2xl">
+
+            <div id="stage" class="relative w-full h-full">
+                <!-- Data inject -->
+                <div id="noData" class="absolute inset-0 flex items-center justify-center font-orbitron text-2xl text-slate-400 tracking-widest hidden">
+                    [ VERİ BEKLENİYOR ]
+                </div>
+            </div>
+            
+            <div id="nav" class="absolute bottom-12 left-12 flex gap-4 z-20 items-center">
+                <!-- Nav Dots inject -->
+            </div>
+        </main>
+
+        <!-- RIGHT PANEL: HEROES -->
+        <aside class="w-[540px] h-full bg-black/20 flex flex-col pt-12 pb-8 px-8 rounded-2xl">
+            <h2 class="flex flex-col text-center mb-12">
+                <span class="font-orbitron text-4xl font-bold text-cyan-400 tracking-widest uppercase shadow-black drop-shadow-lg">Mutfak Kahramanları</span>
+                <span class="font-mono text-slate-100 mt-3 text-xl uppercase tracking-widest">Bu Ayın Operasyon Yıldızları</span>
+            </h2>
+            
+            <div id="heroesList" class="flex flex-col gap-10 flex-1 overflow-y-auto">
+                <!-- Heroes inject -->
+            </div>
+            
+            <div id="footerInfo" class="mt-8 font-mono text-center text-sm text-slate-300 uppercase tracking-widest">
+                SYS :: BOOT
+            </div>
+        </aside>
+
+    </div>
+
+    <script>
+    (function KuleRadar() {
+        "use strict";
+
+        const API = "/api/data", POLL = 30000, SL_MS = 15000;
+        let data = null, idx = 0, max = 0, tmr = null;
+
+        const $stage  = document.getElementById("stage");
+        const $nav    = document.getElementById("nav");
+        const $heroes = document.getElementById("heroesList");
+        const $noData = document.getElementById("noData");
+        const $footer = document.getElementById("footerInfo");
+        const $clock  = document.getElementById("clock");
+        const $cDate  = document.getElementById("cDate");
+        
+        const MN = ["OCAK","ŞUBAT","MART","NİSAN","MAYIS","HAZİRAN","TEMMUZ","AĞUSTOS","EYLÜL","EKİM","KASIM","ARALIK"];
+        const DN = ["PAZAR","PAZARTESİ","SALI","ÇARŞAMBA","PERŞEMBE","CUMA","CUMARTESİ"];
+
+        function tick() {
+            const n = new Date();
+            $clock.textContent = n.toLocaleTimeString("tr-TR",{hour12:false});
+            if($cDate) {
+                $cDate.textContent = `${n.getDate()} ${MN[n.getMonth()]} ${n.getFullYear()} // ${DN[n.getDay()]}`;
+            }
+        }
+        tick(); setInterval(tick, 1000);
+
+        async function poll() {
+            try {
+                const r = await fetch(API,{cache:"no-store"});
+                if (!r.ok) throw new Error(r.status);
+                const d = await r.json();
+                if (JSON.stringify(d) !== JSON.stringify(data)) { data = d; renderAll(); }
+            } catch(e) { console.warn("[KR]",e.message); }
+        }
+        poll(); setInterval(poll, POLL);
+
+        function renderAll() {
+            if (!data) return;
+            renderSlides();
+            renderHeroes();
+            if (data.last_updated) {
+                const d = new Date(data.last_updated);
+                $footer.textContent = `SYS :: SON GÜNCELLEME :: ${d.toLocaleString("tr-TR")}`;
+            }
+        }
+
+        /* ── Slides ────────────────── */
+        function renderSlides() {
+            const ps = data.active_projects || [];
+            max = ps.length;
+            $stage.querySelectorAll(".slide").forEach(e => e.remove());
+            $nav.innerHTML = "";
+            
+            if (max === 0) {
+                $noData.classList.remove("hidden");
+                return;
+            }
+            $noData.classList.add("hidden");
+
+            ps.forEach((p,i) => {
+                const frag = document.createRange().createContextualFragment(mkSlide(p, i));
+                $stage.appendChild(frag);
+                
+                const dot = document.createElement("div");
+                dot.className = `nav-dot h-3 w-3 bg-slate-600 rounded-full ${i===0 ? 'on' : ''}`;
+                $nav.appendChild(dot);
+            });
+
+            idx = 0; go(0); resetTmr();
+        }
+
+        function mkSlide(p, i) {
+            const pct = p.progress || 0;
+            const risk = p.status === "at_risk";
+            
+            let barBg = "bg-cyan-500 glow-cyan";
+            let pctText = "text-cyan-400";
+            if (pct >= 70) { barBg = "bg-green-500 glow-green"; pctText = "text-green-400"; }
+            if (risk) { barBg = "bg-orange-500 glow-orange"; pctText = "text-orange-400"; }
+            
+            const days = calcDays(p.deadline);
+            let timeCls = "text-green-400 text-6xl";
+            let timeText = `${days} GÜN KALDI`;
+            if (days <= 14 && days > 0) timeCls = "text-orange-500 text-6xl pulse-warn";
+            if (days <= 0) { timeCls = "text-red-500 text-5xl pulse-crit"; timeText = "SÜRE DOLDU"; }
+            
+            const teamHtml = (p.team || []).map(m => `
+                <div class="flex items-center gap-5 bg-black/40 rounded-2xl p-4">
+                    <img src="${esc(m.avatar_url)}" class="w-24 h-24 rounded-full object-cover">
+                    <div class="flex flex-col">
+                        <span class="text-3xl font-bold text-white mb-2">${esc(m.name)}</span>
+                        <span class="text-xl text-slate-100 font-mono">${esc(m.role)}</span>
+                    </div>
+                </div>
+            `).join("");
+
+            return `
+            <div class="slide ${i === 0 ? 'active' : ''} flex flex-col gap-10 justify-center w-full h-full pt-16">
+                <!-- 1. Satır: Proje ID ve Statü -->
+                <div class="flex flex-row items-center gap-6">
+                    <div class="font-orbitron font-bold text-4xl text-white bg-cyan-900/60 px-6 py-3 tracking-widest rounded-lg">${esc(p.id)}</div>
+                    <div class="font-mono font-bold text-3xl uppercase tracking-widest px-6 py-3 rounded-lg text-white ${risk ? 'bg-orange-600/80 shadow-[0_0_15px_rgba(255,165,0,0.6)]' : 'bg-green-600/80 shadow-[0_0_15px_rgba(0,255,136,0.6)]'}">
+                        ${risk ? '▲ RİSKTE' : '● AKTİF'}
+                    </div>
+                </div>
+                
+                <!-- 2. Satır: Proje Başlığı -->
+                <h1 class="font-orbitron text-7xl font-black text-white uppercase tracking-wider leading-tight drop-shadow-md">
+                    ${esc(p.name)}
+                </h1>
+                
+                <!-- 3. Satır: Progress Bar -->
+                <div class="w-full flex flex-col gap-5 mt-4">
+                    <div class="flex justify-between items-end w-full">
+                        <span class="font-mono text-3xl text-slate-100 tracking-widest">PROJE İLERLEMESİ</span>
+                        <span class="font-orbitron text-7xl font-black ${pctText} drop-shadow-lg">%${pct}</span>
+                    </div>
+                    <div class="w-full h-12 bg-slate-900 rounded-full relative overflow-hidden shadow-inner">
+                        <div class="h-full ${barBg} relative transition-all duration-1000 ease-out" style="width: ${pct}%">
+                            <div class="absolute inset-0 prog-stripes"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 4. Satır: Geri Sayım & Avatarlar -->
+                <div class="flex flex-row gap-8 items-start mt-6 w-full">
+                    <!-- Geri Sayım -->
+                    <div class="bg-black/40 p-8 rounded-2xl shrink-0 flex flex-col items-center justify-center min-w-[360px]">
+                        <span class="font-mono text-2xl text-slate-100 uppercase tracking-widest mb-4">Geri Sayım</span>
+                        <div class="font-orbitron font-black uppercase drop-shadow-lg ${timeCls}">
+                            ${timeText}
+                        </div>
+                    </div>
+                    <!-- Personeller -->
+                    <div class="flex flex-row flex-wrap gap-6 items-start flex-1">
+                        ${teamHtml}
+                    </div>
+                </div>
+            </div>`;
+        }
+
+        function go(i) {
+            const ss = $stage.querySelectorAll(".slide");
+            const ds = $nav.querySelectorAll(".nav-dot");
+            ss.forEach((s,j) => { s.classList.toggle("active", j === i); });
+            ds.forEach((d,j) => { d.classList.toggle("on", j === i); });
+        }
+        function nxt() { if(max<=1) return; idx=(idx+1)%max; go(idx); }
+        function resetTmr() { if(tmr) clearInterval(tmr); tmr=setInterval(nxt, SL_MS); }
+
+        /* ── Heroes ────────────── */
+        function renderHeroes() {
+            const hs = data.kitchen_heroes || [];
+            
+            $heroes.innerHTML = hs.map(h => `
+                <div class="flex items-center gap-8 bg-black/40 p-6 w-full rounded-2xl">
+                    <img src="${esc(h.avatar_url)}" class="w-28 h-28 rounded-full object-cover shrink-0 shadow-[0_0_15px_rgba(0,255,255,0.4)]">
+                    <div class="flex flex-col justify-center flex-1">
+                        <div class="font-orbitron text-3xl font-bold text-cyan-400 mb-3 uppercase tracking-wider drop-shadow-md">${esc(h.name)}</div>
+                        <div class="text-2xl text-white font-rajdhani leading-snug">${esc(h.achievement)}</div>
+                    </div>
+                </div>
+            `).join("");
+        }
+
+        /* ── Utils ─────────────── */
+        function esc(s) { 
+            if(!s) return ""; 
+            const d=document.createElement("div"); d.textContent=String(s); return d.innerHTML; 
+        }
+        function calcDays(ds) { 
+            if(!ds) return 0; 
+            return Math.ceil((new Date(ds+"T23:59:59")-new Date())/864e5); 
+        }
+    })();
+    </script>
+</body>
+</html>

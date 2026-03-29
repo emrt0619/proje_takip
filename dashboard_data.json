@@ -1,0 +1,141 @@
+{
+  "system_status": 200,
+  "last_updated": "2026-03-28T20:28:40.901828+00:00",
+  "employees": [
+    {
+      "id": "EMP-001",
+      "name": "Ahmet Yılmaz",
+      "role": "Lead Developer",
+      "photo_url": "/static/avatars/default1.svg"
+    },
+    {
+      "id": "EMP-002",
+      "name": "Elif Demir",
+      "role": "Data Engineer",
+      "photo_url": "/static/avatars/default2.svg"
+    },
+    {
+      "id": "EMP-003",
+      "name": "Can Öztürk",
+      "role": "QA Engineer",
+      "photo_url": "/static/avatars/default3.svg"
+    },
+    {
+      "id": "EMP-004",
+      "name": "Zeynep Kaya",
+      "role": "Frontend Dev",
+      "photo_url": "/static/avatars/default4.svg"
+    },
+    {
+      "id": "EMP-005",
+      "name": "Burak Şen",
+      "role": "Backend Dev",
+      "photo_url": "/static/avatars/default5.svg"
+    },
+    {
+      "id": "EMP-006",
+      "name": "Deniz Arslan",
+      "role": "Architect",
+      "photo_url": "/static/avatars/default1.svg"
+    },
+    {
+      "id": "EMP-007",
+      "name": "Selin Yıldız",
+      "role": "DevOps",
+      "photo_url": "/static/avatars/default2.svg"
+    },
+    {
+      "id": "EMP-008",
+      "name": "Mert Koç",
+      "role": "Developer",
+      "photo_url": "/static/avatars/default3.svg"
+    },
+    {
+      "id": "EMP-009",
+      "name": "Ayşe Çelik",
+      "role": "Hardware Eng.",
+      "photo_url": "/static/avatars/default4.svg"
+    },
+    {
+      "id": "EMP-010",
+      "name": "Emre celik",
+      "role": "Firmware Dev",
+      "photo_url": "/static/avatars/default5.svg"
+    }
+  ],
+  "active_projects": [
+    {
+      "id": "OP-101",
+      "name": "Veri Toplama Modülü",
+      "deadline": "2026-05-15",
+      "progress": 75,
+      "status": "on_track",
+      "team_ids": [
+        "EMP-001",
+        "EMP-002",
+        "EMP-003"
+      ]
+    },
+    {
+      "id": "OP-102",
+      "name": "Kule Radar Dashboard v2",
+      "deadline": "2026-04-30",
+      "progress": 45,
+      "status": "at_risk",
+      "team_ids": [
+        "EMP-004",
+        "EMP-005"
+      ]
+    },
+    {
+      "id": "OP-103",
+      "name": "Entegrasyon API",
+      "deadline": "2026-06-01",
+      "progress": 20,
+      "status": "at_risk",
+      "team_ids": [
+        "EMP-006",
+        "EMP-007",
+        "EMP-008"
+      ]
+    },
+    {
+      "id": "OP-104",
+      "name": "IoT Sensör Ağı Pilot",
+      "deadline": "2026-07-20",
+      "progress": 90,
+      "status": "on_track",
+      "team_ids": [
+        "EMP-009",
+        "EMP-010"
+      ]
+    },
+    {
+      "id": "PN1519",
+      "name": "Deneme",
+      "deadline": "2026-12-25",
+      "progress": 25,
+      "status": "on_track",
+      "team_ids": [
+        "EMP-002",
+        "EMP-003",
+        "EMP-004",
+        "EMP-001"
+      ]
+    }
+  ],
+  "kitchen_heroes": [
+    {
+      "employee_id": "EMP-001",
+      "achievement": "Bu ay 3 kritik bug'ı production'a çıkmadan yakaladı!"
+    },
+    {
+      "employee_id": "EMP-004",
+      "achievement": "Dashboard UI'ı sıfırdan yeniden tasarladı."
+    },
+    {
+      "employee_id": "EMP-007",
+      "achievement": "CI/CD pipeline süresini %40 kısalttı."
+    }
+  ]
+}

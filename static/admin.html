@@ -1,0 +1,1019 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KULE RADAR — Yönetim Paneli</title>
+    <meta name="description" content="Kule Radar Admin — Personel, Proje ve Kahraman Yönetimi">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;500;600;700&family=Share+Tech+Mono&family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --black: #000000;
+            --grafit: #111111;
+            --surface: #0a0a0a;
+            --input-bg: #0d0d0d;
+            --border: #333333;
+            --border-focus: #00ffff;
+            --cyan: #00ffff;
+            --green: #00ff00;
+            --orange: #ffaa00;
+            --red: #ff3333;
+            --text: #e0e0e0;
+            --text-sec: #888888;
+            --text-dim: #555555;
+            --glow-cyan: 0 0 8px rgba(0,255,255,0.35);
+            --glow-green: 0 0 8px rgba(0,255,0,0.35);
+            --glow-orange: 0 0 8px rgba(255,170,0,0.35);
+        }
+
+        html { height: 100%; }
+
+        body {
+            min-height: 100%;
+            background: var(--black);
+            color: var(--text);
+            font-family: 'Inter', sans-serif;
+            line-height: 1.5;
+        }
+
+        /* ── HEADER ──────────────────────────── */
+        .top-bar {
+            position: sticky; top: 0; z-index: 200;
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 36px; height: 56px;
+            background: var(--grafit);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .top-bar-left {
+            display: flex; align-items: center; gap: 14px;
+        }
+
+        .top-bar-icon {
+            width: 30px; height: 30px;
+            border: 1px solid var(--cyan);
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: var(--glow-cyan);
+        }
+
+        .top-bar-icon svg { width: 14px; height: 14px; fill: var(--cyan); }
+
+        .top-bar-title {
+            font-family: 'Fira Code', monospace;
+            font-size: 0.95rem; font-weight: 700;
+            letter-spacing: 4px; color: var(--cyan);
+            text-shadow: var(--glow-cyan);
+        }
+
+        .badge {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.6rem; letter-spacing: 2px;
+            padding: 2px 10px;
+            border: 1px solid var(--orange);
+            color: var(--orange);
+            text-transform: uppercase;
+        }
+
+        .top-bar-right { display: flex; gap: 10px; }
+
+        /* ── TOAST ────────────────────────────── */
+        .toast {
+            position: fixed; top: 16px; right: 16px; z-index: 10000;
+            padding: 14px 24px;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.8rem; font-weight: 500;
+            border: 1px solid;
+            transform: translateX(120%); opacity: 0;
+            transition: transform 0.35s cubic-bezier(0.4,0,0.2,1), opacity 0.35s ease;
+        }
+        .toast.show { transform: translateX(0); opacity: 1; }
+        .toast.ok   { color: var(--green); border-color: rgba(0,255,0,0.4); background: rgba(0,255,0,0.06); }
+        .toast.err  { color: var(--red); border-color: rgba(255,51,51,0.4); background: rgba(255,51,51,0.06); }
+
+        /* ── BUTTONS ──────────────────────────── */
+        .btn {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 8px 18px;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.75rem; font-weight: 600;
+            letter-spacing: 1px;
+            border: 1px solid; cursor: pointer;
+            transition: all 0.2s ease; background: transparent;
+        }
+
+        .btn-cyan  { color: var(--cyan); border-color: rgba(0,255,255,0.4); }
+        .btn-cyan:hover { background: rgba(0,255,255,0.08); box-shadow: var(--glow-cyan); }
+
+        .btn-green { color: var(--green); border-color: rgba(0,255,0,0.4); }
+        .btn-green:hover { background: rgba(0,255,0,0.08); box-shadow: var(--glow-green); }
+
+        .btn-orange { color: var(--orange); border-color: rgba(255,170,0,0.4); }
+        .btn-orange:hover { background: rgba(255,170,0,0.08); box-shadow: var(--glow-orange); }
+
+        .btn-red   { color: var(--red); border-color: rgba(255,51,51,0.3); }
+        .btn-red:hover { background: rgba(255,51,51,0.08); }
+
+        .btn-ghost { color: var(--text-dim); border-color: var(--border); }
+        .btn-ghost:hover { color: var(--text); border-color: var(--text-dim); }
+
+        .btn-sm { padding: 5px 12px; font-size: 0.7rem; }
+
+        /* ── MAIN ─────────────────────────────── */
+        .main {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 32px 36px 100px;
+        }
+
+        /* ── SECTION ──────────────────────────── */
+        .section {
+            margin-bottom: 48px;
+        }
+
+        .sec-head {
+            display: flex; align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .sec-title {
+            font-family: 'Fira Code', monospace;
+            font-size: 0.85rem; font-weight: 700;
+            letter-spacing: 4px; text-transform: uppercase;
+            color: var(--cyan);
+            display: flex; align-items: center; gap: 10px;
+        }
+
+        .sec-count {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.65rem; color: var(--text-dim);
+            padding: 2px 10px;
+            border: 1px solid var(--border);
+            letter-spacing: 1px;
+        }
+
+        /* ── PANEL (replaces cards) ───────────── */
+        .panel {
+            border: 1px solid var(--border);
+            background: var(--surface);
+            padding: 24px;
+            margin-bottom: 14px;
+            transition: border-color 0.2s ease;
+        }
+
+        .panel:hover { border-color: var(--text-dim); }
+
+        .panel-head {
+            display: flex; align-items: center;
+            justify-content: space-between;
+            margin-bottom: 18px;
+        }
+
+        .panel-id {
+            font-family: 'Fira Code', monospace;
+            font-size: 0.75rem; font-weight: 600;
+            color: var(--cyan); letter-spacing: 2px;
+            padding: 2px 10px;
+            border: 1px solid rgba(0,255,255,0.25);
+        }
+
+        .panel-actions { display: flex; gap: 8px; }
+
+        /* ── FORM ─────────────────────────────── */
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+        .form-group { display: flex; flex-direction: column; gap: 5px; }
+        .form-group.full { grid-column: 1 / -1; }
+
+        .form-label {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.65rem; font-weight: 400;
+            color: var(--text-dim);
+            letter-spacing: 2px; text-transform: uppercase;
+        }
+
+        .form-input, .form-select {
+            background: var(--input-bg);
+            border: 1px solid var(--border);
+            padding: 9px 14px;
+            color: var(--text);
+            font-family: 'Inter', sans-serif;
+            font-size: 0.85rem;
+            outline: none;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .form-input:focus, .form-select:focus {
+            border-color: var(--border-focus);
+            box-shadow: var(--glow-cyan);
+        }
+
+        .form-input::placeholder { color: var(--text-dim); }
+
+        .form-select {
+            cursor: pointer; appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='%23555'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            padding-right: 32px;
+        }
+
+        /* ── SLIDER ───────────────────────────── */
+        .slider-wrap {
+            display: flex; align-items: center; gap: 14px;
+        }
+
+        .slider {
+            flex: 1;
+            -webkit-appearance: none; appearance: none;
+            height: 6px; background: var(--input-bg);
+            border: 1px solid var(--border);
+            outline: none; cursor: pointer;
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px; height: 18px; border-radius: 50%;
+            background: var(--cyan);
+            border: 2px solid #fff;
+            cursor: pointer;
+            box-shadow: var(--glow-cyan);
+        }
+
+        .slider-val {
+            font-family: 'Fira Code', monospace;
+            font-size: 1rem; font-weight: 700;
+            min-width: 48px; text-align: right;
+            letter-spacing: 1px;
+        }
+        .sv-h { color: var(--green); }
+        .sv-m { color: var(--cyan); }
+        .sv-l { color: var(--orange); }
+
+        /* ── MULTI-SELECT DROPDOWN ────────────── */
+        .ms-wrap {
+            position: relative;
+        }
+
+        .ms-trigger {
+            background: var(--input-bg);
+            border: 1px solid var(--border);
+            padding: 8px 14px;
+            color: var(--text);
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.85rem;
+            display: flex; align-items: center;
+            justify-content: space-between;
+            min-height: 40px;
+            transition: border-color 0.2s ease;
+        }
+
+        .ms-trigger:hover { border-color: var(--text-dim); }
+        .ms-trigger.open { border-color: var(--cyan); box-shadow: var(--glow-cyan); }
+
+        .ms-tags {
+            display: flex; flex-wrap: wrap; gap: 6px; flex: 1;
+        }
+
+        .ms-tag {
+            display: inline-flex; align-items: center; gap: 4px;
+            padding: 2px 8px;
+            border: 1px solid var(--border);
+            background: rgba(0,255,255,0.06);
+            font-family: 'Fira Code', monospace;
+            font-size: 0.7rem; color: var(--cyan);
+        }
+
+        .ms-tag-x {
+            cursor: pointer; font-size: 0.8rem;
+            color: var(--text-dim);
+            transition: color 0.15s;
+        }
+        .ms-tag-x:hover { color: var(--red); }
+
+        .ms-placeholder { color: var(--text-dim); font-size: 0.8rem; }
+
+        .ms-arrow {
+            font-size: 0.6rem; color: var(--text-dim);
+            margin-left: 8px; transition: transform 0.2s;
+        }
+        .ms-trigger.open .ms-arrow { transform: rotate(180deg); }
+
+        .ms-dropdown {
+            position: absolute; top: 100%; left: 0; right: 0;
+            background: var(--grafit);
+            border: 1px solid var(--border);
+            border-top: none;
+            max-height: 240px; overflow-y: auto;
+            z-index: 50;
+            display: none;
+        }
+
+        .ms-dropdown.open { display: block; }
+
+        .ms-search {
+            width: 100%; padding: 8px 12px;
+            background: var(--input-bg);
+            border: none; border-bottom: 1px solid var(--border);
+            color: var(--text); font-size: 0.8rem;
+            outline: none;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .ms-search::placeholder { color: var(--text-dim); }
+
+        .ms-option {
+            display: flex; align-items: center; gap: 10px;
+            padding: 8px 14px;
+            cursor: pointer;
+            transition: background 0.15s;
+            font-size: 0.82rem;
+        }
+
+        .ms-option:hover { background: rgba(0,255,255,0.06); }
+
+        .ms-option.selected { background: rgba(0,255,255,0.1); }
+
+        .ms-option-photo {
+            width: 28px; height: 28px; border-radius: 50%;
+            border: 1px solid var(--border);
+            object-fit: cover; background: #1a1a1a;
+        }
+
+        .ms-option-name { color: var(--text); font-weight: 500; }
+        .ms-option-role { color: var(--text-dim); font-size: 0.72rem; margin-left: auto; font-family: 'Share Tech Mono', monospace; }
+
+        .ms-check {
+            width: 14px; height: 14px;
+            border: 1px solid var(--border);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.65rem; color: var(--cyan);
+            flex-shrink: 0;
+        }
+        .ms-option.selected .ms-check {
+            border-color: var(--cyan);
+            background: rgba(0,255,255,0.12);
+        }
+
+        /* ── EMPLOYEE PANEL ───────────────────── */
+        .emp-row {
+            display: grid;
+            grid-template-columns: 60px 1fr 1fr auto;
+            gap: 12px;
+            align-items: center;
+            padding: 14px 0;
+            border-bottom: 1px solid rgba(51,51,51,0.5);
+        }
+        .emp-row:last-child { border-bottom: none; }
+
+        .emp-photo-wrap {
+            position: relative;
+            width: 48px; height: 48px;
+        }
+
+        .emp-photo {
+            width: 48px; height: 48px;
+            border-radius: 50%;
+            border: 1px solid var(--border);
+            object-fit: cover;
+            background: #1a1a1a;
+        }
+
+        .emp-photo-upload {
+            position: absolute; inset: 0;
+            border-radius: 50%;
+            background: rgba(0,0,0,0.6);
+            display: flex; align-items: center; justify-content: center;
+            opacity: 0; cursor: pointer;
+            transition: opacity 0.2s;
+            font-size: 0.7rem; color: var(--cyan);
+        }
+
+        .emp-photo-upload:hover { opacity: 1; }
+        .emp-photo-wrap:hover .emp-photo-upload { opacity: 1; }
+
+        .emp-photo-file {
+            position: absolute; inset: 0;
+            opacity: 0; cursor: pointer;
+            width: 48px; height: 48px;
+            border-radius: 50%;
+        }
+
+        .emp-name-input { font-weight: 600; }
+        .emp-actions { display: flex; gap: 6px; }
+
+        /* ── HERO EDIT ────────────────────────── */
+        .hero-edit-row {
+            display: grid;
+            grid-template-columns: 200px 1fr auto;
+            gap: 12px;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(51,51,51,0.5);
+        }
+        .hero-edit-row:last-child { border-bottom: none; }
+
+        /* ── SAVE BAR ─────────────────────────── */
+        .save-bar {
+            position: fixed; bottom: 0; left: 0; right: 0;
+            height: 56px;
+            background: var(--grafit);
+            border-top: 1px solid var(--border);
+            display: flex; align-items: center;
+            justify-content: space-between;
+            padding: 0 36px; z-index: 200;
+        }
+
+        .save-info {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.7rem; color: var(--text-dim);
+            letter-spacing: 1px;
+        }
+
+        .save-actions { display: flex; gap: 10px; }
+
+        /* ── LOADING ──────────────────────────── */
+        .loading {
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.9);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 20000;
+            transition: opacity 0.3s;
+        }
+        .loading.hide { opacity: 0; pointer-events: none; }
+
+        .loader {
+            width: 40px; height: 40px;
+            border: 2px solid var(--border);
+            border-top-color: var(--cyan);
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* ── EMPTY ────────────────────────────── */
+        .empty {
+            text-align: center; padding: 40px;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.8rem; color: var(--text-dim);
+            letter-spacing: 2px;
+        }
+
+        /* ── RESPONSIVE ───────────────────────── */
+        @media (max-width: 768px) {
+            .main { padding: 20px 16px 80px; }
+            .form-grid { grid-template-columns: 1fr; }
+            .emp-row { grid-template-columns: 48px 1fr auto; }
+            .hero-edit-row { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="toast" id="toast"></div>
+    <div class="loading" id="loading"><div class="loader"></div></div>
+
+    <!-- TOP BAR -->
+    <header class="top-bar">
+        <div class="top-bar-left">
+            <div class="top-bar-icon">
+                <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+            </div>
+            <span class="top-bar-title">KULE RADAR</span>
+            <span class="badge">ADMİN</span>
+        </div>
+        <div class="top-bar-right">
+            <a href="/static/index.html" target="_blank" class="btn btn-ghost btn-sm">◉ TV EKRANI</a>
+        </div>
+    </header>
+
+    <main class="main" id="main">
+
+        <!-- ═══ PERSONEL ═══ -->
+        <div class="section" id="secEmployees">
+            <div class="sec-head">
+                <div class="sec-title">
+                    ◆ PERSONEL HAVUZU
+                    <span class="sec-count" id="empCount">0</span>
+                </div>
+                <button class="btn btn-cyan btn-sm" onclick="A.addEmployee()">+ YENİ PERSONEL</button>
+            </div>
+            <div class="panel" id="empPanel">
+                <div id="empList"></div>
+            </div>
+        </div>
+
+        <!-- ═══ PROJELER ═══ -->
+        <div class="section" id="secProjects">
+            <div class="sec-head">
+                <div class="sec-title">
+                    ◆ AKTİF PROJELER
+                    <span class="sec-count" id="projCount">0</span>
+                </div>
+                <button class="btn btn-cyan btn-sm" onclick="A.addProject()">+ YENİ PROJE</button>
+            </div>
+            <div id="projList"></div>
+        </div>
+
+        <!-- ═══ KAHRAMANLAR ═══ -->
+        <div class="section" id="secHeroes">
+            <div class="sec-head">
+                <div class="sec-title">
+                    ◆ MUTFAK KAHRAMANLARI
+                    <span class="sec-count" id="heroCount">0</span>
+                </div>
+                <button class="btn btn-cyan btn-sm" onclick="A.addHero()">+ YENİ KAHRAMAN</button>
+            </div>
+            <div class="panel" id="heroPanel">
+                <div id="heroList"></div>
+            </div>
+        </div>
+    </main>
+
+    <!-- SAVE BAR -->
+    <div class="save-bar">
+        <div class="save-info" id="saveInfo">SYS::BOOT</div>
+        <div class="save-actions">
+            <button class="btn btn-ghost btn-sm" onclick="A.reload()">↻ YENİLE</button>
+            <button class="btn btn-green" onclick="A.save()">▶ KAYDET</button>
+        </div>
+    </div>
+
+    <script>
+    const A = (function() {
+        "use strict";
+
+        const API = "/api/data";
+        const UPLOAD = "/api/upload";
+        let data = null;
+
+        const $ = s => document.querySelector(s);
+
+        /* ── Init ─────────────────────── */
+        async function init() {
+            await load();
+            $("#loading").classList.add("hide");
+        }
+
+        /* ── Load ─────────────────────── */
+        async function load() {
+            try {
+                const r = await fetch(API, { cache: "no-store" });
+                if (!r.ok) throw new Error(r.status);
+                const d = await r.json();
+                // Use raw data for admin editing
+                data = {
+                    system_status: d.system_status || 200,
+                    last_updated: d.last_updated || "",
+                    employees: d.employees || [],
+                    active_projects: d._raw_projects || d.active_projects || [],
+                    kitchen_heroes: d._raw_heroes || d.kitchen_heroes || []
+                };
+                render();
+                setInfo("VERİLER YÜKLENDİ");
+            } catch (e) {
+                toast("Bağlantı hatası: " + e.message, "err");
+                setInfo("HATA: VERİ YÜKLENEMEDİ");
+            }
+        }
+
+        /* ── Save ─────────────────────── */
+        async function save() {
+            if (!data) return;
+            try {
+                const payload = collect();
+                const r = await fetch(API, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload)
+                });
+                if (!r.ok) throw new Error(r.status);
+                const result = await r.json();
+                data = result.data || payload;
+                toast("Atomik kayıt başarılı", "ok");
+                setInfo("SON KAYIT :: " + new Date().toLocaleTimeString("tr-TR"));
+                render();
+            } catch (e) {
+                toast("Kayıt hatası: " + e.message, "err");
+            }
+        }
+
+        /* ── Collect ──────────────────── */
+        function collect() {
+            // Employees
+            const employees = [];
+            document.querySelectorAll(".emp-row").forEach(row => {
+                const inputs = row.querySelectorAll(".form-input");
+                const img = row.querySelector(".emp-photo");
+                if (inputs[0] && inputs[0].value.trim()) {
+                    employees.push({
+                        id: row.dataset.eid || genEmpId(),
+                        name: inputs[0].value.trim(),
+                        role: inputs[1] ? inputs[1].value.trim() : "",
+                        photo_url: img ? img.src.replace(location.origin, "") : "/static/avatars/default1.svg"
+                    });
+                }
+            });
+
+            // Projects
+            const projects = [];
+            document.querySelectorAll(".proj-panel").forEach(panel => {
+                const teamIds = JSON.parse(panel.dataset.teamIds || "[]");
+                projects.push({
+                    id: panel.querySelector(".p-id").value.trim() || genProjId(),
+                    name: panel.querySelector(".p-name").value.trim(),
+                    deadline: panel.querySelector(".p-deadline").value,
+                    progress: parseInt(panel.querySelector(".p-progress").value) || 0,
+                    status: panel.querySelector(".p-status").value,
+                    team_ids: teamIds
+                });
+            });
+
+            // Heroes
+            const heroes = [];
+            document.querySelectorAll(".hero-edit-row").forEach(row => {
+                const sel = row.querySelector(".h-emp");
+                const achv = row.querySelector(".h-achv");
+                if (sel && sel.value) {
+                    heroes.push({
+                        employee_id: sel.value,
+                        achievement: achv ? achv.value.trim() : ""
+                    });
+                }
+            });
+
+            return {
+                system_status: 200,
+                last_updated: new Date().toISOString(),
+                employees,
+                active_projects: projects,
+                kitchen_heroes: heroes
+            };
+        }
+
+        /* ── Render ───────────────────── */
+        function render() {
+            if (!data) return;
+            renderEmployees();
+            renderProjects();
+            renderHeroes();
+        }
+
+        /* ── Employees ────────────────── */
+        function renderEmployees() {
+            const emps = data.employees || [];
+            $("#empCount").textContent = emps.length;
+            const c = $("#empList");
+
+            if (emps.length === 0) {
+                c.innerHTML = '<div class="empty">[ HAVUZ BOŞ ]</div>';
+                return;
+            }
+
+            c.innerHTML = emps.map((e, i) => `
+                <div class="emp-row" data-eid="${esc(e.id)}">
+                    <div class="emp-photo-wrap">
+                        <img class="emp-photo" src="${esc(e.photo_url)}" alt="" onerror="this.src='/static/avatars/default1.svg'">
+                        <div class="emp-photo-upload" onclick="this.nextElementSibling.click()">📷</div>
+                        <input class="emp-photo-file" type="file" accept="image/*" onchange="A.uploadPhoto(this, ${i})">
+                    </div>
+                    <input class="form-input emp-name-input" type="text" value="${esc(e.name)}" placeholder="İsim">
+                    <input class="form-input" type="text" value="${esc(e.role)}" placeholder="Rol / Unvan">
+                    <div class="emp-actions">
+                        <button class="btn btn-red btn-sm" onclick="A.removeEmployee(${i})">✕</button>
+                    </div>
+                </div>
+            `).join("");
+        }
+
+        /* ── Projects ─────────────────── */
+        function renderProjects() {
+            const projs = data.active_projects || [];
+            $("#projCount").textContent = projs.length;
+            const c = $("#projList");
+
+            if (projs.length === 0) {
+                c.innerHTML = '<div class="empty">[ PROJE YOK ]</div>';
+                return;
+            }
+
+            c.innerHTML = projs.map((p, i) => {
+                const pct = p.progress || 0;
+                const lvl = pct >= 70 ? "h" : pct >= 40 ? "m" : "l";
+                const teamIds = p.team_ids || [];
+
+                return `
+                <div class="panel proj-panel" data-team-ids='${JSON.stringify(teamIds)}'>
+                    <div class="panel-head">
+                        <span class="panel-id">${esc(p.id)}</span>
+                        <div class="panel-actions">
+                            <button class="btn btn-red btn-sm" onclick="A.removeProject(${i})">SİL</button>
+                        </div>
+                    </div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label">PROJE ID</label>
+                            <input class="form-input p-id" type="text" value="${esc(p.id)}" placeholder="OP-XXX">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">PROJE ADI</label>
+                            <input class="form-input p-name" type="text" value="${esc(p.name)}" placeholder="Proje adı">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">BİTİŞ TARİHİ</label>
+                            <input class="form-input p-deadline" type="date" value="${p.deadline || ''}">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">DURUM</label>
+                            <select class="form-select p-status">
+                                <option value="on_track" ${p.status==='on_track'?'selected':''}>● YOLUNDA</option>
+                                <option value="at_risk" ${p.status==='at_risk'?'selected':''}>▲ RİSK</option>
+                            </select>
+                        </div>
+                        <div class="form-group full">
+                            <label class="form-label">İLERLEME (%)</label>
+                            <div class="slider-wrap">
+                                <input class="slider p-progress" type="range" min="0" max="100" value="${pct}" oninput="A.slideLbl(this)">
+                                <span class="slider-val sv-${lvl}">%${pct}</span>
+                            </div>
+                        </div>
+                        <div class="form-group full">
+                            <label class="form-label">EKİP ÜYELERİ</label>
+                            <div class="ms-wrap" data-proj-idx="${i}">
+                                <div class="ms-trigger" onclick="A.toggleMs(this)">
+                                    <div class="ms-tags">${teamIds.length > 0
+                                        ? teamIds.map(tid => {
+                                            const emp = (data.employees||[]).find(e=>e.id===tid);
+                                            return emp ? `<span class="ms-tag">${esc(emp.name)}<span class="ms-tag-x" onclick="event.stopPropagation();A.unselectTeam(${i},'${tid}')">×</span></span>` : '';
+                                          }).join('')
+                                        : '<span class="ms-placeholder">Personel seçin...</span>'
+                                    }</div>
+                                    <span class="ms-arrow">▼</span>
+                                </div>
+                                <div class="ms-dropdown" id="ms-dd-${i}">
+                                    <input class="ms-search" type="text" placeholder="Ara..." oninput="A.filterMs(this, ${i})">
+                                    <div class="ms-options" id="ms-opts-${i}">
+                                        ${(data.employees||[]).map(emp => {
+                                            const sel = teamIds.includes(emp.id);
+                                            return `<div class="ms-option ${sel?'selected':''}" data-eid="${emp.id}" onclick="A.toggleTeam(${i},'${emp.id}')">
+                                                <div class="ms-check">${sel?'✓':''}</div>
+                                                <img class="ms-option-photo" src="${esc(emp.photo_url)}" alt="" onerror="this.style.display='none'">
+                                                <span class="ms-option-name">${esc(emp.name)}</span>
+                                                <span class="ms-option-role">${esc(emp.role)}</span>
+                                            </div>`;
+                                        }).join('')}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
+            }).join("");
+        }
+
+        /* ── Heroes ───────────────────── */
+        function renderHeroes() {
+            const heroes = data.kitchen_heroes || [];
+            $("#heroCount").textContent = heroes.length;
+            const c = $("#heroList");
+
+            if (heroes.length === 0) {
+                c.innerHTML = '<div class="empty">[ KAHRAMAN YOK ]</div>';
+                return;
+            }
+
+            c.innerHTML = heroes.map((h, i) => `
+                <div class="hero-edit-row">
+                    <div class="form-group">
+                        <label class="form-label">PERSONEL</label>
+                        <select class="form-select h-emp">
+                            <option value="">Seçin...</option>
+                            ${(data.employees||[]).map(e =>
+                                `<option value="${e.id}" ${h.employee_id===e.id?'selected':''}>${esc(e.name)} — ${esc(e.role)}</option>`
+                            ).join('')}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">BAŞARI</label>
+                        <input class="form-input h-achv" type="text" value="${esc(h.achievement)}" placeholder="Başarı açıklaması...">
+                    </div>
+                    <div class="form-group" style="align-self:end;">
+                        <button class="btn btn-red btn-sm" onclick="A.removeHero(${i})">✕</button>
+                    </div>
+                </div>
+            `).join("");
+        }
+
+        /* ══ Multi-Select Logic ══════════ */
+        function toggleMs(trigger) {
+            const dd = trigger.nextElementSibling;
+            const isOpen = dd.classList.contains("open");
+            // Close all
+            document.querySelectorAll(".ms-dropdown.open").forEach(d => d.classList.remove("open"));
+            document.querySelectorAll(".ms-trigger.open").forEach(t => t.classList.remove("open"));
+            if (!isOpen) {
+                dd.classList.add("open");
+                trigger.classList.add("open");
+                dd.querySelector(".ms-search").value = "";
+                dd.querySelector(".ms-search").focus();
+                filterMs(dd.querySelector(".ms-search"), parseInt(trigger.closest(".ms-wrap").dataset.projIdx));
+            }
+        }
+
+        function filterMs(input, projIdx) {
+            const q = input.value.toLowerCase();
+            const opts = input.parentElement.querySelectorAll(".ms-option");
+            opts.forEach(o => {
+                const name = o.querySelector(".ms-option-name").textContent.toLowerCase();
+                const role = o.querySelector(".ms-option-role").textContent.toLowerCase();
+                o.style.display = (name.includes(q) || role.includes(q)) ? "flex" : "none";
+            });
+        }
+
+        function toggleTeam(projIdx, empId) {
+            syncFromDom();
+            const proj = data.active_projects[projIdx];
+            if (!proj) return;
+            if (!proj.team_ids) proj.team_ids = [];
+            const idx = proj.team_ids.indexOf(empId);
+            if (idx >= 0) proj.team_ids.splice(idx, 1);
+            else proj.team_ids.push(empId);
+            renderProjects();
+        }
+
+        function unselectTeam(projIdx, empId) {
+            syncFromDom();
+            const proj = data.active_projects[projIdx];
+            if (!proj || !proj.team_ids) return;
+            const idx = proj.team_ids.indexOf(empId);
+            if (idx >= 0) proj.team_ids.splice(idx, 1);
+            renderProjects();
+        }
+
+        // Close dropdowns on outside click
+        document.addEventListener("click", function(e) {
+            if (!e.target.closest(".ms-wrap")) {
+                document.querySelectorAll(".ms-dropdown.open").forEach(d => d.classList.remove("open"));
+                document.querySelectorAll(".ms-trigger.open").forEach(t => t.classList.remove("open"));
+            }
+        });
+
+        /* ══ Sync DOM → data ═════════════ */
+        function syncFromDom() {
+            data = collect();
+        }
+
+        /* ══ CRUD ═══════════════════════ */
+        function addEmployee() {
+            syncFromDom();
+            data.employees.push({
+                id: genEmpId(),
+                name: "",
+                role: "",
+                photo_url: "/static/avatars/default" + ((data.employees.length % 5) + 1) + ".svg"
+            });
+            render();
+            toast("Yeni personel eklendi", "ok");
+        }
+
+        function removeEmployee(idx) {
+            syncFromDom();
+            const emp = data.employees[idx];
+            if (!emp) return;
+            if (!confirm(`"${emp.name || 'Personel'}" silinecek. Emin misiniz?`)) return;
+            const eid = emp.id;
+            data.employees.splice(idx, 1);
+            // Projelerden de kaldır
+            (data.active_projects || []).forEach(p => {
+                if (p.team_ids) p.team_ids = p.team_ids.filter(id => id !== eid);
+            });
+            // Kahramanlardan da kaldır
+            data.kitchen_heroes = (data.kitchen_heroes || []).filter(h => h.employee_id !== eid);
+            render();
+            toast("Personel kaldırıldı", "ok");
+        }
+
+        function addProject() {
+            syncFromDom();
+            const nextNum = data.active_projects.length + 101;
+            data.active_projects.push({
+                id: `OP-${nextNum}`,
+                name: "",
+                deadline: "",
+                progress: 0,
+                status: "on_track",
+                team_ids: []
+            });
+            render();
+            toast("Yeni proje eklendi", "ok");
+        }
+
+        function removeProject(idx) {
+            syncFromDom();
+            const name = data.active_projects[idx]?.name || "Proje";
+            if (!confirm(`"${name}" silinecek. Emin misiniz?`)) return;
+            data.active_projects.splice(idx, 1);
+            render();
+            toast("Proje kaldırıldı", "ok");
+        }
+
+        function addHero() {
+            syncFromDom();
+            data.kitchen_heroes.push({ employee_id: "", achievement: "" });
+            render();
+            toast("Yeni kahraman eklendi", "ok");
+        }
+
+        function removeHero(idx) {
+            syncFromDom();
+            data.kitchen_heroes.splice(idx, 1);
+            render();
+            toast("Kahraman kaldırıldı", "ok");
+        }
+
+        /* ══ Photo Upload ═══════════════ */
+        async function uploadPhoto(input, empIdx) {
+            const file = input.files[0];
+            if (!file) return;
+
+            const formData = new FormData();
+            formData.append("file", file);
+
+            try {
+                toast("Fotoğraf yükleniyor...", "ok");
+                const r = await fetch(UPLOAD, { method: "POST", body: formData });
+                if (!r.ok) {
+                    const errData = await r.json().catch(() => ({}));
+                    throw new Error(errData.detail || r.status);
+                }
+                const result = await r.json();
+                // Sync current dom state then update photo
+                syncFromDom();
+                if (data.employees[empIdx]) {
+                    data.employees[empIdx].photo_url = result.url;
+                }
+                render();
+                toast("Fotoğraf yüklendi!", "ok");
+            } catch (e) {
+                toast("Yükleme hatası: " + e.message, "err");
+            }
+        }
+
+        /* ══ Helpers ════════════════════ */
+        function slideLbl(input) {
+            const v = parseInt(input.value);
+            const s = input.nextElementSibling;
+            const c = v >= 70 ? "h" : v >= 40 ? "m" : "l";
+            s.textContent = `%${v}`;
+            s.className = "slider-val sv-" + c;
+        }
+
+        function esc(s) {
+            if (!s) return "";
+            const d = document.createElement("div");
+            d.textContent = String(s);
+            return d.innerHTML;
+        }
+
+        function genEmpId() { return "EMP-" + String(Date.now()).slice(-6); }
+        function genProjId() { return "OP-" + (100 + Math.floor(Math.random() * 900)); }
+
+        function toast(msg, type) {
+            const t = $("#toast");
+            t.textContent = msg;
+            t.className = "toast " + type;
+            requestAnimationFrame(() => t.classList.add("show"));
+            setTimeout(() => t.classList.remove("show"), 3000);
+        }
+
+        function setInfo(msg) { $("#saveInfo").textContent = msg; }
+
+        async function reload() {
+            await load();
+            toast("Veriler yenilendi", "ok");
+        }
+
+        init();
+
+        return {
+            save, reload,
+            addEmployee, removeEmployee,
+            addProject, removeProject,
+            addHero, removeHero,
+            toggleMs, filterMs, toggleTeam, unselectTeam,
+            uploadPhoto, slideLbl
+        };
+    })();
+    </script>
+</body>
+</html>
