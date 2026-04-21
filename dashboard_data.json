@@ -1,6 +1,7 @@
 {
   "system_status": 200,
-  "last_updated": "2026-04-14T20:02:23.548346+00:00",
+  "admin_hash": "59fc602ad5faf49c:82782978bed165b513573d968649ad8edc19c4f5f91b1c76778368d8010addf4",
+  "last_updated": "2026-04-21T14:10:10.294009+00:00",
   "employees": [
     {
       "id": "EMP-001",

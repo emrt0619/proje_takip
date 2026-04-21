@@ -11,15 +11,18 @@ import os
 import shutil
 import tempfile
 import uuid
+import hashlib
+import secrets
 from abc import ABC, abstractmethod
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any
+from typing import Any, Optional
 
-from fastapi import FastAPI, HTTPException, Request, UploadFile, File
+from fastapi import FastAPI, HTTPException, Request, UploadFile, File, Header, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
+from pydantic import BaseModel
 
 # ──────────────────────────────────────────────
 # 1. Adapter Pattern — Soyutlama Katmanı
@@ -108,6 +111,22 @@ app = FastAPI(
     docs_url="/docs",
 )
 
+active_tokens: set[str] = set()
+
+def verify_token(authorization: Optional[str] = Header(None)):
+    if not authorization or not authorization.startswith("Bearer "):
+        raise HTTPException(status_code=401, detail="Yetkisiz Erişim")
+    token = authorization.split(" ")[1]
+    if token not in active_tokens:
+        raise HTTPException(status_code=401, detail="Geçersiz veya süresi dolmuş token")
+
+class LoginRequest(BaseModel):
+    password: str
+
+class ChangePasswordRequest(BaseModel):
+    old_password: str
+    new_password: str
+
 # CORS — TV ve Admin farklı origin'lerden erişebilir.
 app.add_middleware(
     CORSMiddleware,
@@ -174,7 +193,7 @@ async def get_data() -> JSONResponse:
 
 
 # ── POST /api/data ────────────────────────────
-@app.post("/api/data")
+@app.post("/api/data", dependencies=[Depends(verify_token)])
 async def post_data(request: Request) -> JSONResponse:
     """
     Admin panelinden gelen veriyi atomik olarak JSON dosyasına yazar.
@@ -198,7 +217,7 @@ async def post_data(request: Request) -> JSONResponse:
 
 
 # ── POST /api/upload ──────────────────────────
-@app.post("/api/upload")
+@app.post("/api/upload", dependencies=[Depends(verify_token)])
 async def upload_file(file: UploadFile = File(...)) -> JSONResponse:
     """
     Personel fotoğrafı yükleme endpoint'i.
@@ -248,6 +267,55 @@ async def upload_file(file: UploadFile = File(...)) -> JSONResponse:
     # Statik URL'yi döndür
     file_url = f"/static/uploads/{unique_name}"
     return JSONResponse(content={"ok": True, "url": file_url, "filename": unique_name})
+
+
+# ── POST /api/login ───────────────────────────
+@app.post("/api/login")
+async def login(req: LoginRequest) -> JSONResponse:
+    """Admin girişi yapar ve token döner."""
+    data = adapter.read()
+    admin_hash_str = data.get("admin_hash")
+    if not admin_hash_str:
+        raise HTTPException(status_code=500, detail="Admin parolası ayarlanmamış.")
+    
+    parts = admin_hash_str.split(":", 1)
+    if len(parts) != 2:
+        raise HTTPException(status_code=500, detail="Admin parolası formatı geçersiz.")
+    salt, stored_hash = parts
+
+    computed = hashlib.sha256((req.password + salt).encode("utf-8")).hexdigest()
+    if computed != stored_hash:
+        raise HTTPException(status_code=401, detail="Hatalı parola")
+    
+    token = secrets.token_hex(32)
+    active_tokens.add(token)
+    return JSONResponse(content={"ok": True, "token": token})
+
+
+# ── POST /api/change-password ──────────────────
+@app.post("/api/change-password", dependencies=[Depends(verify_token)])
+async def change_password(req: ChangePasswordRequest) -> JSONResponse:
+    """Mevcut parolayı doğrular ve yenisiyle değiştirir."""
+    data = adapter.read()
+    admin_hash_str = data.get("admin_hash", ":")
+    salt, stored_hash = admin_hash_str.split(":", 1)
+
+    computed = hashlib.sha256((req.old_password + salt).encode("utf-8")).hexdigest()
+    if computed != stored_hash:
+        raise HTTPException(status_code=400, detail="Eski parola hatalı")
+    
+    if len(req.new_password) < 6:
+        raise HTTPException(status_code=400, detail="Yeni parola çok kısa")
+
+    new_salt = secrets.token_hex(8)
+    new_hash = hashlib.sha256((req.new_password + new_salt).encode("utf-8")).hexdigest()
+    
+    data["admin_hash"] = f"{new_salt}:{new_hash}"
+    try:
+        adapter.write(data)
+        return JSONResponse(content={"ok": True})
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail="Şifre güncellenirken hata oluştu.")
 
 
 # ── Statik Dosya Sunucu ──────────────────────

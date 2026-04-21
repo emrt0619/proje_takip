@@ -28,6 +28,7 @@
             --glow-cyan: 0 0 8px rgba(0,255,255,0.35);
             --glow-green: 0 0 8px rgba(0,255,0,0.35);
             --glow-orange: 0 0 8px rgba(255,170,0,0.35);
+            --glow-red: 0 0 8px rgba(255,51,51,0.35);
         }
 
         html { height: 100%; }
@@ -469,6 +470,53 @@
             letter-spacing: 2px;
         }
 
+        /* ── MODALS ───────────────────────────── */
+        .modal-overlay {
+            position: fixed; inset: 0; z-index: 10000;
+            background: rgba(0,0,0,0.85); backdrop-filter: blur(10px);
+            display: flex; align-items: center; justify-content: center;
+            opacity: 1; transition: opacity 0.3s ease;
+        }
+        .modal-overlay.hide { opacity: 0; pointer-events: none; }
+        .modal-box {
+            background: rgba(10, 10, 10, 0.95);
+            border: 1px solid var(--border);
+            border-top: 2px solid var(--cyan);
+            box-shadow: 0 10px 40px rgba(0, 255, 255, 0.1), inset 0 0 20px rgba(0, 255, 255, 0.05);
+            padding: 40px 32px; width: 100%; max-width: 360px;
+            text-align: center;
+            transform: translateY(0); transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .modal-overlay.hide .modal-box { transform: translateY(-20px); }
+        .modal-title {
+            font-family: 'Fira Code', monospace; font-size: 1.2rem;
+            color: var(--cyan); margin-bottom: 30px; letter-spacing: 4px;
+            text-shadow: var(--glow-cyan);
+            display: flex; flex-direction: column; align-items: center; gap: 8px;
+        }
+        .modal-title svg { width: 32px; height: 32px; fill: var(--cyan); filter: drop-shadow(0 0 8px rgba(0,255,255,0.4)); }
+        .modal-form { display: flex; flex-direction: column; gap: 16px; position: relative; }
+        .modal-input {
+            background: rgba(0,0,0,0.5); border: 1px solid var(--border);
+            color: var(--text); padding: 12px; font-family: 'Inter', sans-serif;
+            text-align: center; letter-spacing: 2px; outline: none;
+            transition: all 0.3s ease;
+        }
+        .modal-input:focus { border-color: var(--cyan); box-shadow: var(--glow-cyan); background: rgba(0,255,255,0.02); }
+        .modal-input.err-state { border-color: var(--red); box-shadow: var(--glow-red); background: rgba(255,51,51,0.05); }
+        .modal-err-msg {
+            color: var(--red); font-family: 'Share Tech Mono', monospace;
+            font-size: 0.75rem; min-height: 18px; letter-spacing: 1px;
+            text-shadow: 0 0 5px rgba(255,51,51,0.5);
+        }
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-6px); }
+            40%, 80% { transform: translateX(6px); }
+        }
+        .shake { animation: shake 0.4s ease-in-out; }
+
         /* ── RESPONSIVE ───────────────────────── */
         @media (max-width: 768px) {
             .top-bar, .save-bar { padding: 0 16px; }
@@ -498,6 +546,37 @@
     <div class="toast" id="toast"></div>
     <div class="loading" id="loading"><div class="loader"></div></div>
 
+    <!-- MODALS -->
+    <div class="modal-overlay hide" id="loginModal">
+        <div class="modal-box" id="loginBox">
+            <div class="modal-title">
+                <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+                SİSTEME GİRİŞ
+            </div>
+            <div class="modal-form">
+                <input type="password" id="loginPwd" class="modal-input" placeholder="PAROLA" onkeypress="if(event.key==='Enter') A.login()">
+                <div class="modal-err-msg" id="loginErr"></div>
+                <button class="btn btn-cyan" style="justify-content:center; padding: 12px;" onclick="A.login()">GİRİŞ YAP</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay hide" id="pwdModal">
+        <div class="modal-box" id="pwdBox">
+            <div class="modal-title">ŞİFRE DEĞİŞTİR</div>
+            <div class="modal-form">
+                <input type="password" id="pwdOld" class="modal-input" placeholder="Eski Şifre">
+                <input type="password" id="pwdNew" class="modal-input" placeholder="Yeni Şifre">
+                <input type="password" id="pwdConfirm" class="modal-input" placeholder="Yeni Şifre (Tekrar)">
+                <div class="modal-err-msg" id="pwdErr"></div>
+                <div style="display:flex; gap:10px;">
+                    <button class="btn btn-ghost" style="flex:1; justify-content:center; padding: 12px;" onclick="document.getElementById('pwdModal').classList.add('hide')">İPTAL</button>
+                    <button class="btn btn-cyan" style="flex:1; justify-content:center; padding: 12px;" onclick="A.changePassword()">DEĞİŞTİR</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- TOP BAR -->
     <header class="top-bar">
         <div class="top-bar-left">
@@ -508,6 +587,8 @@
             <span class="badge">ADMİN</span>
         </div>
         <div class="top-bar-right">
+            <button class="btn btn-ghost btn-sm" onclick="A.showChangePwd()">🔑 ŞİFRE</button>
+            <button class="btn btn-ghost btn-sm" onclick="A.logout()">ÇIKIŞ</button>
             <a href="/static/index.html" target="_blank" class="btn btn-ghost btn-sm">◉ TV EKRANI</a>
         </div>
     </header>
@@ -571,20 +652,136 @@
         const API = "/api/data";
         const UPLOAD = "/api/upload";
         let data = null;
+        let token = "";
 
         const $ = s => document.querySelector(s);
 
         /* ── Init ─────────────────────── */
         async function init() {
-            await load();
-            $("#loading").classList.add("hide");
+            if (!token) {
+                $("#loading").classList.add("hide");
+                $("#loginModal").classList.remove("hide");
+                return;
+            }
+            try {
+                await load();
+                $("#loginModal").classList.add("hide");
+            } catch (e) {
+                if (e.message === "401") {
+                    logout();
+                }
+            } finally {
+                $("#loading").classList.add("hide");
+            }
+        }
+
+        /* ── Auth ─────────────────────── */
+        async function login() {
+            const pwdInput = $("#loginPwd");
+            const pwd = pwdInput.value;
+            const errBox = $("#loginErr");
+            const loginBox = $("#loginBox");
+            
+            errBox.textContent = "";
+            pwdInput.classList.remove("err-state");
+            
+            if (!pwd) {
+                return showError(loginBox, pwdInput, errBox, "PAROLA GİRİNİZ");
+            }
+            
+            try {
+                const r = await fetch("/api/login", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ password: pwd })
+                });
+                if (!r.ok) throw new Error("ERİŞİM REDDEDİLDİ: Geçersiz Parola");
+                
+                const res = await r.json();
+                token = res.token;
+                pwdInput.value = "";
+                $("#loginModal").classList.add("hide");
+                $("#loading").classList.remove("hide");
+                await load();
+                $("#loading").classList.add("hide");
+            } catch(e) {
+                showError(loginBox, pwdInput, errBox, e.message);
+            }
+        }
+
+        function logout() {
+            token = "";
+            $("#loginModal").classList.remove("hide");
+        }
+
+        function showChangePwd() {
+            const inputs = [$("#pwdOld"), $("#pwdNew"), $("#pwdConfirm")];
+            inputs.forEach(i => { i.value = ""; i.classList.remove("err-state"); });
+            $("#pwdErr").textContent = "";
+            $("#pwdModal").classList.remove("hide");
+        }
+
+        async function changePassword() {
+            const oldP = $("#pwdOld").value;
+            const newP = $("#pwdNew").value;
+            const cnfP = $("#pwdConfirm").value;
+            const errBox = $("#pwdErr");
+            const pwdBox = $("#pwdBox");
+            
+            errBox.textContent = "";
+            const inputs = [$("#pwdOld"), $("#pwdNew"), $("#pwdConfirm")];
+            inputs.forEach(i => i.classList.remove("err-state"));
+
+            if(!oldP || !newP || !cnfP) {
+                inputs.forEach(i => { if(!i.value) i.classList.add("err-state"); });
+                return showError(pwdBox, null, errBox, "TÜM ALANLARI DOLDURUN");
+            }
+            if(newP !== cnfP) {
+                $("#pwdNew").classList.add("err-state");
+                $("#pwdConfirm").classList.add("err-state");
+                return showError(pwdBox, null, errBox, "YENİ ŞİFRELER EŞLEŞMİYOR");
+            }
+            if(newP.length < 6) {
+                $("#pwdNew").classList.add("err-state");
+                return showError(pwdBox, null, errBox, "ŞİFRE ÇOK KISA (MIN 6)");
+            }
+
+            try {
+                const r = await fetch("/api/change-password", {
+                    method: "POST",
+                    headers: { 
+                        "Content-Type": "application/json",
+                        "Authorization": "Bearer " + token
+                    },
+                    body: JSON.stringify({ old_password: oldP, new_password: newP })
+                });
+                if(!r.ok) {
+                    const err = await r.json();
+                    throw new Error(err.detail ? err.detail.toUpperCase() : "HATA OLUŞTU");
+                }
+                toast("Şifre başarıyla değiştirildi", "ok");
+                $("#pwdModal").classList.add("hide");
+            } catch(e) {
+                showError(pwdBox, $("#pwdOld"), errBox, e.message);
+            }
+        }
+        
+        function showError(boxElem, inputElem, errTextElem, msg) {
+            if(inputElem) inputElem.classList.add("err-state");
+            errTextElem.textContent = msg;
+            boxElem.classList.remove("shake");
+            void boxElem.offsetWidth; // Trigger reflow
+            boxElem.classList.add("shake");
         }
 
         /* ── Load ─────────────────────── */
         async function load() {
             try {
                 const r = await fetch(API, { cache: "no-store" });
-                if (!r.ok) throw new Error(r.status);
+                if (!r.ok) {
+                    if (r.status === 401) throw new Error("401");
+                    throw new Error(r.status);
+                }
                 const d = await r.json();
                 // Use raw data for admin editing
                 data = {
@@ -597,6 +794,7 @@
                 render();
                 setInfo("VERİLER YÜKLENDİ");
             } catch (e) {
+                if (e.message === "401") throw e; // Rethrow to init
                 toast("Bağlantı hatası: " + e.message, "err");
                 setInfo("HATA: VERİ YÜKLENEMEDİ");
             }
@@ -609,10 +807,16 @@
                 const payload = collect();
                 const r = await fetch(API, {
                     method: "POST",
-                    headers: { "Content-Type": "application/json" },
+                    headers: { 
+                        "Content-Type": "application/json",
+                        "Authorization": "Bearer " + token
+                    },
                     body: JSON.stringify(payload)
                 });
-                if (!r.ok) throw new Error(r.status);
+                if (!r.ok) {
+                    if (r.status === 401) logout();
+                    throw new Error(r.status);
+                }
                 const result = await r.json();
                 data = result.data || payload;
                 toast("Atomik kayıt başarılı", "ok");
@@ -985,8 +1189,13 @@
 
             try {
                 toast("Fotoğraf yükleniyor...", "ok");
-                const r = await fetch(UPLOAD, { method: "POST", body: formData });
+                const r = await fetch(UPLOAD, { 
+                    method: "POST", 
+                    headers: { "Authorization": "Bearer " + token },
+                    body: formData 
+                });
                 if (!r.ok) {
+                    if (r.status === 401) logout();
                     const errData = await r.json().catch(() => ({}));
                     throw new Error(errData.detail || r.status);
                 }
@@ -1040,7 +1249,7 @@
         init();
 
         return {
-            save, reload,
+            save, reload, login, logout, showChangePwd, changePassword,
             addEmployee, removeEmployee,
             addProject, removeProject,
             addHero, removeHero,
