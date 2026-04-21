@@ -346,10 +346,14 @@ if __name__ == "__main__":
     except ValueError:
         port = 8000
 
+    # Üretim (production) ortamında reload kapalı olmalıdır
+    env = os.getenv("ENV", "development").lower()
+    is_reload = (env != "production")
+
     uvicorn.run(
         "main:app",
         host=host,
         port=port,
-        reload=True,
+        reload=is_reload,
         log_level="info",
     )
