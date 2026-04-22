@@ -222,6 +222,11 @@ async def post_data(request: Request) -> JSONResponse:
         )
 
     try:
+        # Mevcut veriyi oku ve admin_hash değerini koru
+        current_data = adapter.read()
+        if "admin_hash" in current_data:
+            payload["admin_hash"] = current_data["admin_hash"]
+
         updated = adapter.write(payload)
         return JSONResponse(content={"ok": True, "data": updated})
     except Exception as exc:
