@@ -13,3 +13,6 @@ __pycache__/
 # Uploads
 static/uploads/*
 !static/uploads/.gitkeep
+
+# Data
+dashboard_data.json
