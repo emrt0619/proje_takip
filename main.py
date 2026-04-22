@@ -165,6 +165,18 @@ async def get_data() -> JSONResponse:
                         "role": emp["role"],
                         "avatar_url": emp.get("photo_url", "")
                     })
+            
+            inst_team_ids = p.pop("installation_team_ids", [])
+            p["installation_team"] = []
+            for eid in inst_team_ids:
+                emp = employees.get(eid)
+                if emp:
+                    p["installation_team"].append({
+                        "name": emp["name"],
+                        "role": emp["role"],
+                        "avatar_url": emp.get("photo_url", "")
+                    })
+                    
             resolved_projects.append(p)
 
         # kitchen_heroes çözümle

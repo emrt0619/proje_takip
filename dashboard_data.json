@@ -1,7 +1,6 @@
 {
   "system_status": 200,
-  "admin_hash": "59fc602ad5faf49c:82782978bed165b513573d968649ad8edc19c4f5f91b1c76778368d8010addf4",
-  "last_updated": "2026-04-21T14:10:10.294009+00:00",
+  "last_updated": "2026-04-22T06:53:52.292311+00:00",
   "employees": [
     {
       "id": "EMP-001",
@@ -104,11 +103,13 @@
       "deadline": "2026-05-15",
       "progress": 75,
       "status": "on_track",
+      "is_in_installation": false,
       "team_ids": [
         "EMP-001",
         "EMP-002",
         "EMP-003"
-      ]
+      ],
+      "installation_team_ids": []
     },
     {
       "id": "OP-102",
@@ -117,11 +118,16 @@
         "en": "ezHEMS +"
       },
       "deadline": "2026-12-21",
-      "progress": 22,
+      "progress": 94,
       "status": "at_risk",
+      "is_in_installation": true,
       "team_ids": [
         "EMP-003",
         "EMP-001"
+      ],
+      "installation_team_ids": [
+        "EMP-007",
+        "EMP-002"
       ]
     }
   ],

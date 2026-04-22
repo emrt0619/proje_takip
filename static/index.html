@@ -71,8 +71,8 @@
 
     <header class="flex flex-col lg:flex-row justify-between items-start lg:items-center w-full px-4 lg:px-10 py-4 lg:py-6 gap-4 lg:gap-0 relative z-20 shrink-0">
         <!-- Sol Üst: Logo ve İsim -->
-        <div class="flex flex-row items-center gap-4">
-            <img src="/static/img/logo.png" alt="Logo" class="w-12 h-12 lg:w-16 lg:h-16 object-contain drop-shadow-[0_0_10px_rgba(0,255,255,0.6)]" onerror="this.style.display='none'">
+        <div class="flex flex-row items-center gap-4 lg:gap-6">
+            <img src="/static/img/logo.png" alt="Logo" class="w-16 h-16 lg:w-20 lg:h-20 object-contain drop-shadow-[0_0_12px_rgba(0,255,255,0.8)]" onerror="this.style.display='none'">
             <div class="flex flex-col">
                 <span class="font-orbitron font-bold text-2xl lg:text-4xl text-cyan-400 tracking-widest drop-shadow-[0_0_8px_rgba(0,255,255,0.5)]">KULE RADAR</span>
                 <span class="font-mono text-xs lg:text-sm text-slate-400 tracking-widest uppercase">DEEP TECH ORCHESTRA</span>
@@ -137,8 +137,8 @@
         "use strict";
 
         const i18n = {
-            tr: { countdown: "GERİ SAYIM", daysLeft: "GÜN KALDI", progress: "PROJE İLERLEMESİ", heroes: "MUTFAK KAHRAMANLARI", subtitle: "Bu Ayın Operasyon Yıldızları", live: "CANLI", active: "● AKTİF", risk: "▲ RİSKTE", expired: "SÜRE DOLDU", unknown: "Bilinmiyor", noData: "[ VERİ BEKLENİYOR ]", radar: "RADAR ÖZETİ" },
-            en: { countdown: "COUNTDOWN", daysLeft: "DAYS LEFT", progress: "PROJECT PROGRESS", heroes: "KITCHEN HEROES", subtitle: "Operation Stars of the Month", live: "LIVE", active: "● ACTIVE", risk: "▲ AT RISK", expired: "TIME UP", unknown: "Unknown", noData: "[ WAITING FOR DATA ]", radar: "RADAR SUMMARY" }
+            tr: { countdown: "GERİ SAYIM", daysLeft: "GÜN KALDI", progress: "PROJE İLERLEMESİ", heroes: "MUTFAK KAHRAMANLARI", subtitle: "Bu Ayın Operasyon Yıldızları", live: "CANLI", active: "● AKTİF", risk: "▲ RİSKTE", expired: "SÜRE DOLDU", unknown: "Bilinmiyor", noData: "[ VERİ BEKLENİYOR ]", radar: "RADAR ÖZETİ", fieldOpsTitle: "⚡ SAHA KURULUMU DEVAM EDİYOR", fieldOpsMsg: "Sahadaki ekibimize operasyonda başarılar dileriz." },
+            en: { countdown: "COUNTDOWN", daysLeft: "DAYS LEFT", progress: "PROJECT PROGRESS", heroes: "KITCHEN HEROES", subtitle: "Operation Stars of the Month", live: "LIVE", active: "● ACTIVE", risk: "▲ AT RISK", expired: "TIME UP", unknown: "Unknown", noData: "[ WAITING FOR DATA ]", radar: "RADAR SUMMARY", fieldOpsTitle: "⚡ FIELD INSTALLATION IN PROGRESS", fieldOpsMsg: "We wish our field team success in the operation." }
         };
         let currentLang = 'tr';
 
@@ -282,6 +282,7 @@
                 </h1>
                 
                 <!-- 3. Satır: Progress Bar -->
+                ${!p.is_in_installation ? `
                 <div class="w-full flex flex-col gap-3 lg:gap-5 mt-2 lg:mt-4 shrink-0">
                     <div class="flex justify-between items-end w-full">
                         <span class="font-mono text-xl md:text-2xl lg:text-3xl text-slate-100 tracking-widest">${t.progress}</span>
@@ -293,18 +294,39 @@
                         </div>
                     </div>
                 </div>
+                ` : ''}
                 
                 <!-- 4. Satır: Geri Sayım & Avatarlar -->
-                <div class="flex flex-col xl:flex-row gap-6 lg:gap-8 items-start mt-2 lg:mt-6 w-full flex-1 min-h-0">
-                    <!-- Geri Sayım -->
-                    <div class="bg-black/40 p-6 lg:p-8 rounded-2xl shrink-0 flex flex-col items-center justify-center w-full xl:w-auto xl:min-w-[360px]">
-                        <span class="font-mono text-lg lg:text-2xl text-slate-100 uppercase tracking-widest mb-2 lg:mb-4">${t.countdown}</span>
-                        <div class="font-orbitron font-black uppercase drop-shadow-lg ${timeCls} text-center">
-                            ${timeText}
+                <div class="flex flex-col xl:flex-row gap-4 lg:gap-6 items-start mt-2 lg:mt-4 w-full flex-1 min-h-0 pb-2">
+                    <!-- Geri Sayım & Saha Kurulumu -->
+                    <div class="flex flex-col gap-4 w-full xl:w-auto xl:min-w-[360px] shrink-0">
+                        ${!p.is_in_installation ? `
+                        <!-- Geri Sayım -->
+                        <div class="bg-black/40 p-4 lg:p-6 rounded-2xl flex flex-col items-center justify-center">
+                            <span class="font-mono text-base lg:text-xl text-slate-100 uppercase tracking-widest mb-2">${t.countdown}</span>
+                            <div class="font-orbitron font-black uppercase drop-shadow-lg ${timeCls} text-center">
+                                ${timeText}
+                            </div>
                         </div>
+                        ` : `
+                        <!-- Saha Kurulumu Modülü -->
+                        <div class="bg-orange-900/30 border border-orange-500 p-8 lg:p-12 rounded-2xl flex flex-col items-center justify-center shadow-[0_0_25px_rgba(255,165,0,0.7)] pulse-warn w-full flex-1 min-h-[220px]">
+                            <span class="font-orbitron font-bold text-2xl lg:text-4xl text-orange-400 mb-3 text-center uppercase tracking-wider">${t.fieldOpsTitle}</span>
+                            <span class="font-mono text-base lg:text-xl text-slate-200 text-center mb-8">${t.fieldOpsMsg}</span>
+                            <div class="flex flex-row flex-wrap justify-center gap-6 lg:gap-10">
+                                ${ (p.installation_team || []).map(m => `
+                                    <div class="flex flex-col items-center gap-3 lg:gap-4">
+                                        <img src="${esc(m.avatar_url || "/static/avatars/default1.svg")}" class="w-20 h-20 lg:w-32 lg:h-32 rounded-full border-[3px] border-orange-400 object-cover shadow-[0_0_20px_rgba(255,165,0,0.9)]">
+                                        <span class="font-mono text-base lg:text-xl text-orange-200 text-center break-words max-w-[140px]">${esc(m.name)}</span>
+                                    </div>
+                                `).join("") }
+                            </div>
+                        </div>
+                        `}
                     </div>
+
                     <!-- Personeller -->
-                    <div class="flex flex-row flex-wrap gap-4 lg:gap-6 items-start flex-1 w-full overflow-y-auto">
+                    <div class="flex flex-row flex-wrap gap-3 lg:gap-4 items-start flex-1 w-full overflow-y-auto pr-2">
                         ${teamHtml}
                     </div>
                 </div>
@@ -315,11 +337,22 @@
             const t = i18n[lang];
             
             const gridHtml = ps.map(p => {
+                const isInst = p.is_in_installation || false;
                 const risk = p.status === "at_risk";
-                const borderCls = risk ? "border-red-500 shadow-[0_0_15px_rgba(255,34,68,0.7)]" : "border-cyan-500/30";
-                const bgCls = risk ? "bg-red-900/30 pulse-crit" : "bg-black/40";
-                const titleCls = risk ? "text-red-400" : "text-cyan-400";
-                const pctCls = risk ? "text-red-400" : (p.progress >= 70 ? "text-green-400" : "text-cyan-400");
+                
+                let borderCls, bgCls, titleCls, pctCls;
+                
+                if (isInst) {
+                    borderCls = "border-orange-500 shadow-[0_0_15px_rgba(255,165,0,0.7)]";
+                    bgCls = "bg-orange-900/30 pulse-warn";
+                    titleCls = "text-orange-400";
+                    pctCls = "text-orange-400";
+                } else {
+                    borderCls = risk ? "border-red-500 shadow-[0_0_15px_rgba(255,34,68,0.7)]" : "border-cyan-500/30";
+                    bgCls = risk ? "bg-red-900/30 pulse-crit" : "bg-black/40";
+                    titleCls = risk ? "text-red-400" : "text-cyan-400";
+                    pctCls = risk ? "text-red-400" : (p.progress >= 70 ? "text-green-400" : "text-cyan-400");
+                }
                 
                 let pNameText = "";
                 if(typeof p.name === 'object' && p.name !== null) pNameText = p.name[lang] || p.name.tr || "";
@@ -329,9 +362,10 @@
                 <div class="flex flex-col p-3 sm:p-4 rounded-xl border-2 ${borderCls} ${bgCls}">
                     <div class="flex justify-between items-center mb-1 sm:mb-2 gap-4">
                         <span class="font-orbitron text-base sm:text-lg font-bold text-slate-200 shrink-0">${esc(p.id)}</span>
-                        <span class="font-orbitron text-xl sm:text-2xl font-bold ${pctCls}">%${p.progress||0}</span>
+                        <span class="font-orbitron text-xl sm:text-2xl font-bold ${pctCls}">${isInst ? '' : `%${p.progress||0}`}</span>
                     </div>
                     <div class="font-rajdhani text-xl sm:text-2xl md:text-3xl font-bold ${titleCls} truncate text-ellipsis overflow-hidden whitespace-nowrap">${esc(pNameText)}</div>
+                    ${isInst ? `<div class="font-mono text-xs sm:text-sm font-bold text-orange-300 mt-1 sm:mt-2 truncate">${t.fieldOpsTitle}</div>` : ''}
                 </div>
                 `;
             }).join("");

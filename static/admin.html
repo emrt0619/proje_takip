@@ -851,6 +851,7 @@
             const projects = [];
             document.querySelectorAll(".proj-panel").forEach(panel => {
                 const teamIds = JSON.parse(panel.dataset.teamIds || "[]");
+                const instTeamIds = JSON.parse(panel.dataset.instTeamIds || "[]");
                 projects.push({
                     id: panel.querySelector(".p-id").value.trim() || genProjId(),
                     name: {
@@ -860,7 +861,9 @@
                     deadline: panel.querySelector(".p-deadline").value,
                     progress: parseInt(panel.querySelector(".p-progress").value) || 0,
                     status: panel.querySelector(".p-status").value,
-                    team_ids: teamIds
+                    is_in_installation: panel.querySelector(".p-is-inst").checked,
+                    team_ids: teamIds,
+                    installation_team_ids: instTeamIds
                 });
             });
 
@@ -941,9 +944,11 @@
                 const pct = p.progress || 0;
                 const lvl = pct >= 70 ? "h" : pct >= 40 ? "m" : "l";
                 const teamIds = p.team_ids || [];
+                const instTeamIds = p.installation_team_ids || [];
+                const isInst = p.is_in_installation || false;
 
                 return `
-                <div class="panel proj-panel" data-team-ids='${JSON.stringify(teamIds)}'>
+                <div class="panel proj-panel" data-team-ids='${JSON.stringify(teamIds)}' data-inst-team-ids='${JSON.stringify(instTeamIds)}'>
                     <div class="panel-head">
                         <span class="panel-id">${esc(p.id)}</span>
                         <div class="panel-actions">
@@ -1010,6 +1015,42 @@
                                 </div>
                             </div>
                         </div>
+
+                        <!-- SAHA KURULUMU EKLENTİSİ -->
+                        <div class="form-group full" style="display:flex; flex-direction:row; align-items:center; gap:10px; margin-top:10px;">
+                            <input type="checkbox" class="p-is-inst" id="inst-${i}" ${isInst ? 'checked' : ''} onchange="A.toggleInstMode(${i}, this.checked)">
+                            <label class="form-label" for="inst-${i}" style="margin:0; font-size:0.8rem; color:var(--orange); cursor:pointer;">SAHA KURULUMU AKTİF</label>
+                        </div>
+                        <div class="form-group full inst-team-group" style="${isInst ? 'display:block;' : 'display:none;'}">
+                            <label class="form-label" style="color:var(--orange);">KURULUM EKİBİ (SAHADA)</label>
+                            <div class="ms-wrap inst-ms" data-proj-idx="${i}">
+                                <div class="ms-trigger" style="border-color:var(--orange);" onclick="A.toggleMs(this)">
+                                    <div class="ms-tags">${instTeamIds.length > 0
+                                        ? instTeamIds.map(tid => {
+                                            const emp = (data.employees||[]).find(e=>e.id===tid);
+                                            return emp ? `<span class="ms-tag" style="background:rgba(255,170,0,0.1); border-color:var(--orange); color:var(--orange);">${esc(emp.name)}<span class="ms-tag-x" onclick="event.stopPropagation();A.unselectInstTeam(${i},'${tid}')">×</span></span>` : '';
+                                          }).join('')
+                                        : '<span class="ms-placeholder" style="color:var(--orange);">Kurulum personeli seçin...</span>'
+                                    }</div>
+                                    <span class="ms-arrow" style="color:var(--orange);">▼</span>
+                                </div>
+                                <div class="ms-dropdown" id="ms-dd-inst-${i}" style="border-color:var(--orange);">
+                                    <input class="ms-search" type="text" placeholder="Ara..." oninput="A.filterMs(this, ${i})">
+                                    <div class="ms-options" id="ms-opts-inst-${i}">
+                                        ${(data.employees||[]).map(emp => {
+                                            const sel = instTeamIds.includes(emp.id);
+                                            return `<div class="ms-option ${sel?'selected':''}" data-eid="${emp.id}" onclick="A.toggleInstTeam(${i},'${emp.id}')">
+                                                <div class="ms-check" style="${sel?'border-color:var(--orange); background:rgba(255,170,0,0.12); color:var(--orange);':''}">${sel?'✓':''}</div>
+                                                <img class="ms-option-photo" src="${esc(emp.photo_url)}" alt="" onerror="this.style.display='none'">
+                                                <span class="ms-option-name">${esc(emp.name)}</span>
+                                                <span class="ms-option-role">${esc(typeof emp.role === 'object' ? emp.role.tr : emp.role)}</span>
+                                            </div>`;
+                                        }).join('')}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                     </div>
                 </div>`;
             }).join("");
@@ -1095,6 +1136,32 @@
             if (!proj || !proj.team_ids) return;
             const idx = proj.team_ids.indexOf(empId);
             if (idx >= 0) proj.team_ids.splice(idx, 1);
+            renderProjects();
+        }
+
+        function toggleInstMode(projIdx, isChecked) {
+            syncFromDom();
+            data.active_projects[projIdx].is_in_installation = isChecked;
+            renderProjects();
+        }
+
+        function toggleInstTeam(projIdx, empId) {
+            syncFromDom();
+            const proj = data.active_projects[projIdx];
+            if (!proj) return;
+            if (!proj.installation_team_ids) proj.installation_team_ids = [];
+            const idx = proj.installation_team_ids.indexOf(empId);
+            if (idx >= 0) proj.installation_team_ids.splice(idx, 1);
+            else proj.installation_team_ids.push(empId);
+            renderProjects();
+        }
+
+        function unselectInstTeam(projIdx, empId) {
+            syncFromDom();
+            const proj = data.active_projects[projIdx];
+            if (!proj || !proj.installation_team_ids) return;
+            const idx = proj.installation_team_ids.indexOf(empId);
+            if (idx >= 0) proj.installation_team_ids.splice(idx, 1);
             renderProjects();
         }
 
@@ -1254,6 +1321,7 @@
             addProject, removeProject,
             addHero, removeHero,
             toggleMs, filterMs, toggleTeam, unselectTeam,
+            toggleInstMode, toggleInstTeam, unselectInstTeam,
             uploadPhoto, slideLbl
         };
     })();
