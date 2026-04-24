@@ -293,6 +293,14 @@
             background: rgba(0,255,255,0.06);
             font-family: 'Fira Code', monospace;
             font-size: 0.7rem; color: var(--cyan);
+            max-width: 100%;
+        }
+
+        .ms-tag-text {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 140px;
         }
 
         .ms-tag-x {
@@ -993,7 +1001,7 @@
                                     <div class="ms-tags">${teamIds.length > 0
                                         ? teamIds.map(tid => {
                                             const emp = (data.employees||[]).find(e=>e.id===tid);
-                                            return emp ? `<span class="ms-tag">${esc(emp.name)}<span class="ms-tag-x" onclick="event.stopPropagation();A.unselectTeam(${i},'${tid}')">×</span></span>` : '';
+                                            return emp ? `<span class="ms-tag" title="${esc(emp.name)}"><span class="ms-tag-text">${esc(emp.name)}</span><span class="ms-tag-x" onclick="event.stopPropagation();A.unselectTeam(${i},'${tid}')">×</span></span>` : '';
                                           }).join('')
                                         : '<span class="ms-placeholder">Personel seçin...</span>'
                                     }</div>
@@ -1028,7 +1036,7 @@
                                     <div class="ms-tags">${instTeamIds.length > 0
                                         ? instTeamIds.map(tid => {
                                             const emp = (data.employees||[]).find(e=>e.id===tid);
-                                            return emp ? `<span class="ms-tag" style="background:rgba(255,170,0,0.1); border-color:var(--orange); color:var(--orange);">${esc(emp.name)}<span class="ms-tag-x" onclick="event.stopPropagation();A.unselectInstTeam(${i},'${tid}')">×</span></span>` : '';
+                                            return emp ? `<span class="ms-tag" title="${esc(emp.name)}" style="background:rgba(255,170,0,0.1); border-color:var(--orange); color:var(--orange);"><span class="ms-tag-text">${esc(emp.name)}</span><span class="ms-tag-x" onclick="event.stopPropagation();A.unselectInstTeam(${i},'${tid}')">×</span></span>` : '';
                                           }).join('')
                                         : '<span class="ms-placeholder" style="color:var(--orange);">Kurulum personeli seçin...</span>'
                                     }</div>
