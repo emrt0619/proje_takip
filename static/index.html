@@ -69,13 +69,13 @@
     <!-- OVERLAYS (Vignette) -->
     <div class="fixed inset-0 pointer-events-none z-50 bg-[radial-gradient(ellipse_at_center,transparent_50%,rgba(0,0,0,0.7)_100%)]"></div>
 
-    <header class="flex flex-col lg:flex-row justify-between items-start lg:items-center w-full px-4 lg:px-10 py-4 lg:py-6 gap-4 lg:gap-0 relative z-20 shrink-0">
+    <header class="flex flex-col lg:flex-row justify-between items-start lg:items-center w-full px-4 lg:px-10 py-4 lg:py-6 gap-4 lg:gap-0 relative z-[60] shrink-0">
         <!-- Sol Üst: Logo ve İsim -->
-        <div class="flex flex-row items-center gap-4 lg:gap-6">
-            <img src="/static/img/logo.png" alt="Logo" class="w-16 h-16 lg:w-20 lg:h-20 object-contain drop-shadow-[0_0_12px_rgba(0,255,255,0.8)]" onerror="this.style.display='none'">
+        <div class="flex flex-row items-center gap-4 lg:gap-6 bg-black/30 p-2 lg:p-4 rounded-2xl border border-cyan-500/30 shadow-[0_0_25px_rgba(0,255,255,0.15)] backdrop-blur-md">
+            <img src="/static/img/logo.png" alt="Logo" class="w-16 h-16 lg:w-20 lg:h-20 object-contain drop-shadow-[0_0_15px_rgba(0,255,255,0.9)] brightness-110" onerror="this.style.display='none'">
             <div class="flex flex-col">
-                <span class="font-orbitron font-bold text-2xl lg:text-4xl text-cyan-400 tracking-widest drop-shadow-[0_0_8px_rgba(0,255,255,0.5)]">KULE RADAR</span>
-                <span class="font-mono text-xs lg:text-sm text-slate-400 tracking-widest uppercase">DEEP TECH ORCHESTRA</span>
+                <span class="font-orbitron font-black text-2xl lg:text-4xl text-cyan-300 tracking-widest drop-shadow-[0_0_15px_rgba(0,255,255,0.6)]">KULE RADAR</span>
+                <span class="font-mono text-xs lg:text-sm text-cyan-100/70 tracking-widest uppercase font-bold mt-0.5">DEEP TECH ORCHESTRA</span>
             </div>
         </div>
         
