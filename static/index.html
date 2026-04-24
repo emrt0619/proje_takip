@@ -256,8 +256,8 @@
                 const mName = (m.name && typeof m.name === 'object') ? (m.name[lang] || m.name.tr || "İsimsiz") : (m.name || "İsimsiz");
                 const mRole = (m.role && typeof m.role === 'object') ? (m.role[lang] || m.role.tr || t.unknown) : (m.role || t.unknown);
                 return `
-                <div class="flex items-center gap-3 lg:gap-4 bg-black/40 rounded-2xl p-3 lg:p-4 w-full sm:w-auto max-w-full sm:max-w-[300px]">
-                    <img src="${esc(avatar)}" class="w-14 h-14 lg:w-20 lg:h-20 rounded-full object-cover shrink-0">
+                <div class="flex items-start gap-3 lg:gap-4 bg-black/40 rounded-2xl p-3 lg:p-4 w-full sm:w-[280px] lg:w-[340px] shrink-0">
+                    <img src="${esc(avatar)}" class="w-14 h-14 lg:w-20 lg:h-20 rounded-full object-cover shrink-0 mt-1">
                     <div class="flex flex-col flex-1 min-w-0">
                         <span class="text-lg lg:text-2xl font-bold text-white mb-1 leading-tight break-words whitespace-normal">${esc(mName)}</span>
                         <span class="text-xs lg:text-lg text-slate-100 font-mono leading-tight break-words whitespace-normal">${esc(mRole)}</span>
