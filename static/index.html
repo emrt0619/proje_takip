@@ -64,6 +64,20 @@
         /* Nav Dot Active */
         .nav-dot { transition: all 0.3s; }
         .nav-dot.on { background-color: #00ffff; width: 32px; }
+
+        /* Soft LED Clock Glow */
+        .soft-led-glow {
+            color: #ffffff;
+            text-shadow: 0 0 5px rgba(34, 211, 238, 0.8), 
+                         0 0 15px rgba(34, 211, 238, 0.5), 
+                         0 0 30px rgba(34, 211, 238, 0.3);
+            font-weight: 900;
+            letter-spacing: 2px;
+        }
+
+        /* Anti-Shifting Fixed Digits for Orbitron */
+        .digit { display: inline-block; width: 0.85em; text-align: center; }
+        .colon { display: inline-block; width: 0.4em; text-align: center; }
     </style>
 </head>
 <body class="min-h-screen lg:h-screen w-full text-white flex flex-col">
@@ -72,7 +86,7 @@
 
     <header class="flex flex-col lg:flex-row justify-between items-start lg:items-center w-full px-4 lg:px-10 py-4 lg:py-6 gap-4 lg:gap-0 relative z-[60] shrink-0">
         <!-- Sol Üst: Logo ve İsim -->
-        <div class="flex flex-row items-center gap-4 lg:gap-6 bg-slate-900/90 p-2 lg:p-4 rounded-2xl border border-cyan-500/30">
+        <div class="flex flex-row items-center gap-4 lg:gap-6 bg-slate-900/90 p-2 lg:p-4 rounded-2xl border-none ring-0 outline-none">
             <img src="/static/img/logo.png" alt="Logo" class="w-16 h-16 lg:w-20 lg:h-20 object-contain brightness-110" onerror="this.style.display='none'">
             <div class="flex flex-col">
                 <span class="font-orbitron font-black text-2xl lg:text-4xl text-cyan-300 tracking-widest">KULE RADAR</span>
@@ -83,10 +97,10 @@
         <!-- Sağ Üst: Saat ve Tarih -->
         <div class="flex flex-col items-start lg:items-end gap-2 lg:gap-3 relative">
             <div id="langBadge" class="absolute -top-4 right-0 lg:-right-4 font-orbitron font-bold text-xs bg-orange-600/20 text-orange-400 border border-orange-500/50 px-2 py-0.5 rounded opacity-0 transition-opacity duration-500">LANG: EN</div>
-            <div id="clock" class="font-orbitron text-4xl lg:text-7xl font-bold text-cyan-400">00:00:00</div>
+            <div id="clock" class="tabular-nums soft-led-glow font-orbitron text-5xl lg:text-7xl min-w-[160px] lg:min-w-[340px] text-left lg:text-right">00:00:00</div>
             <div class="flex flex-row items-center gap-4 lg:gap-6 mt-1 lg:mt-2">
                 <!-- Tarih Badge -->
-                <div id="cDate" class="font-mono text-lg lg:text-2xl font-bold bg-cyan-900/30 text-cyan-300 border border-cyan-500/50 px-4 lg:px-6 py-1.5 tracking-widest rounded uppercase">
+                <div id="cDate" class="font-mono text-lg lg:text-2xl font-bold bg-cyan-900/30 text-cyan-300 px-4 lg:px-6 py-1.5 tracking-widest rounded uppercase border-none ring-0 outline-none">
                     -- ---- ---- // ---------
                 </div>
                 <!-- Canlı Indicator (Yavaş ve hafif animasyon) -->
@@ -163,7 +177,18 @@
 
         function tick() {
             const n = new Date();
-            $clock.textContent = n.toLocaleTimeString(currentLang==="tr"?"tr-TR":"en-US", {hour12:false});
+            
+            // Orbitron fontunun 1 ve 0 gibi rakamlarındaki milimetrik farkları
+            // tamamen ezmek için her rakamı sabit genişlikli span içine alıyoruz.
+            const makeDigits = (val) => String(val).padStart(2, '0').split('').map(d => `<span class="digit">${d}</span>`).join('');
+            
+            const h = makeDigits(n.getHours());
+            const m = makeDigits(n.getMinutes());
+            const s = makeDigits(n.getSeconds());
+            const blink = `<span class="colon animate-pulse opacity-80">:</span>`;
+            
+            $clock.innerHTML = `${h}${blink}${m}${blink}${s}`;
+            
             if($cDate) {
                 const M = currentLang === "tr" ? MN_TR : MN_EN;
                 const D = currentLang === "tr" ? DN_TR : DN_EN;
