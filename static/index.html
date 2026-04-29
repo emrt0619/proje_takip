@@ -112,10 +112,15 @@
         }
         .hand-hour { width: 8px; height: 25%; background: #ffffff; margin-left: -4px; box-shadow: 0 0 12px rgba(255, 255, 255, 1); border-radius: 6px; }
         .hand-minute { width: 6px; height: 38%; background: #22d3ee; margin-left: -3px; box-shadow: 0 0 10px rgba(34, 211, 238, 0.9); border-radius: 4px; }
-        .hand-second { width: 2px; height: 48%; background: #f97316; margin-left: -1px; box-shadow: 0 0 10px rgba(249, 115, 22, 0.8); }
+        .hand-second { width: 2px; height: 46%; background: #f97316; margin-left: -1px; box-shadow: 0 0 10px rgba(249, 115, 22, 0.8); }
         .clock-center {
-            position: absolute; top: 50%; left: 50%; width: 20px; height: 20px; margin-top: -10px; margin-left: -10px;
-            background: #ffffff; border-radius: 50%; box-shadow: 0 0 15px #ffffff; z-index: 20;
+            position: absolute; top: 50%; left: 50%; width: 26px; height: 26px; margin-top: -13px; margin-left: -13px;
+            background: #020617; border-radius: 50%; border: 3px solid #f97316;
+            box-shadow: 0 0 15px rgba(249, 115, 22, 0.8), inset 0 0 8px rgba(249, 115, 22, 0.5); z-index: 20;
+            display: flex; justify-content: center; align-items: center;
+        }
+        .clock-center::after {
+            content: ''; width: 8px; height: 8px; background: #ffffff; border-radius: 50%; box-shadow: 0 0 10px #ffffff;
         }
         .radar-mark {
             position: absolute; font-family: 'Orbitron', sans-serif; color: #67e8f9;

@@ -58,6 +58,7 @@
         .filter-btn[data-filter="field"].active { background-color: rgba(251, 191, 36, 0.2); color: #fcd34d; border-color: rgba(251, 191, 36, 0.5); box-shadow: 0 0 10px rgba(251, 191, 36, 0.3); }
         .filter-btn[data-filter="risk"].active { background-color: rgba(255, 34, 68, 0.2); color: #fb7185; border-color: rgba(255, 34, 68, 0.5); box-shadow: 0 0 10px rgba(255, 34, 68, 0.3); }
         .filter-btn[data-filter="active"].active { background-color: rgba(6, 182, 212, 0.2); color: #67e8f9; border-color: rgba(6, 182, 212, 0.5); box-shadow: 0 0 10px rgba(6, 182, 212, 0.3); }
+        .filter-btn[data-filter="completed"].active { background-color: rgba(34, 197, 94, 0.2); color: #4ade80; border-color: rgba(34, 197, 94, 0.5); box-shadow: 0 0 10px rgba(34, 197, 94, 0.3); }
 
         /* Custom Scrollbar */
         ::-webkit-scrollbar { width: 8px; }
@@ -112,6 +113,7 @@
                 <button data-filter="field" class="filter-btn font-mono text-xs lg:text-sm px-3 py-1.5 rounded-md bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-white transition-all cursor-pointer">⚡ SAHA OPRS.</button>
                 <button data-filter="risk" class="filter-btn font-mono text-xs lg:text-sm px-3 py-1.5 rounded-md bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-white transition-all cursor-pointer">🚨 RİSKTE</button>
                 <button data-filter="active" class="filter-btn font-mono text-xs lg:text-sm px-3 py-1.5 rounded-md bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-white transition-all cursor-pointer">🔵 AKTİF</button>
+                <button data-filter="completed" class="filter-btn font-mono text-xs lg:text-sm px-3 py-1.5 rounded-md bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-white transition-all cursor-pointer">🏆 TAMAMLANDI</button>
             </div>
 
             <!-- Arama & Sayaç -->
@@ -148,7 +150,8 @@
                 fieldOps: "⚡ SAHA OPRS.",
                 ends: "Deadline",
                 unknown: "Bilinmiyor",
-                noTeam: "Atanmadı"
+                noTeam: "Atanmadı",
+                completed: "🏆 TAMAMLANDI"
             },
             en: {
                 subtitle: "OPERATIONS TERMINAL",
@@ -160,7 +163,8 @@
                 fieldOps: "⚡ FIELD OPS",
                 ends: "Deadline",
                 unknown: "Unknown",
-                noTeam: "Unassigned"
+                noTeam: "Unassigned",
+                completed: "🏆 COMPLETED"
             }
         };
 
@@ -282,10 +286,12 @@
                 projects = projects.filter(p => {
                     const isRisk = p.status === "at_risk";
                     const isInst = p.is_in_installation || false;
+                    const isComp = p.is_completed || false;
                     
                     if (currentFilter === 'field') return isInst;
-                    if (currentFilter === 'risk') return isRisk && !isInst;
-                    if (currentFilter === 'active') return !isRisk && !isInst;
+                    if (currentFilter === 'risk') return isRisk && !isInst && !isComp;
+                    if (currentFilter === 'active') return !isRisk && !isInst && !isComp;
+                    if (currentFilter === 'completed') return isComp;
                     return true;
                 });
             }
@@ -302,7 +308,8 @@
             projects.forEach(p => {
                 const isRisk = p.status === "at_risk";
                 const isInst = p.is_in_installation || false;
-                const pct = isInst ? 100 : (p.progress || 0); 
+                const isComp = p.is_completed || false;
+                const pct = (isInst || isComp) ? 100 : (p.progress || 0); 
 
                 const pName = (typeof p.name === 'object' && p.name !== null) ? (p.name[currentLang] || p.name.tr || t.unknown) : (p.name || t.unknown);
                 
@@ -311,7 +318,12 @@
                 let pctColor = "text-cyan-400";
                 let statusBadge = `<div class="px-3 py-1 bg-cyan-500/20 text-cyan-300 text-xs font-bold rounded-full whitespace-nowrap">${t.active}</div>`;
                 
-                if (isInst) {
+                if (isComp) {
+                    barColor = "bg-green-500"; 
+                    glowClass = "shadow-[0_0_15px_rgba(34,197,94,0.6)]";
+                    pctColor = "text-green-400"; 
+                    statusBadge = `<div class="px-3 py-1 bg-green-500/20 text-green-400 text-xs font-bold rounded-full whitespace-nowrap">${t.completed}</div>`;
+                } else if (isInst) {
                     barColor = "bg-amber-400";
                     glowClass = "shadow-[0_0_10px_rgba(251,191,36,0.6)] pulse-warn";
                     pctColor = "text-amber-400";
