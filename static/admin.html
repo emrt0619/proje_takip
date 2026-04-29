@@ -133,9 +133,28 @@
 
         /* ── SECTION ──────────────────────────── */
         .section {
+            display: none; animation: fadeIn 0.4s ease forwards;
             margin-bottom: 48px;
         }
+        .section.active { display: block; }
+        @keyframes fadeIn { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
 
+        /* ── LAYOUT ───────────────────────────── */
+        .app-container { display: flex; height: 100vh; overflow: hidden; }
+        .sidebar {
+            width: 250px; background: rgba(0,0,0,0.4); border-right: 1px solid var(--border);
+            display: flex; flex-direction: column; padding: 24px 0; z-index: 100;
+        }
+        .sidebar-btn {
+            padding: 16px 24px; font-family: 'Fira Code', monospace; color: var(--text-dim);
+            background: transparent; border: none; border-left: 4px solid transparent;
+            text-align: left; cursor: pointer; transition: all 0.2s ease;
+            font-size: 0.85rem; font-weight: 600; letter-spacing: 2px;
+        }
+        .sidebar-btn:hover { background: rgba(0,255,255,0.05); color: var(--text); }
+        .sidebar-btn.active { color: var(--cyan); border-left-color: var(--cyan); background: rgba(0,255,255,0.1); text-shadow: var(--glow-cyan); }
+        .main-wrapper { flex: 1; display: flex; flex-direction: column; position: relative; overflow-y: auto; }
+        
         .sec-head {
             display: flex; align-items: center;
             justify-content: space-between;
@@ -309,6 +328,13 @@
         }
         .cyber-toggle input:checked + .toggle-slider::after {
             transform: translateX(22px); background: var(--orange); box-shadow: 0 0 5px var(--orange);
+        }
+
+        .cyber-toggle input:checked + .toggle-slider.green-toggle {
+            border-color: var(--green); background: rgba(0,255,0,0.1); box-shadow: var(--glow-green);
+        }
+        .cyber-toggle input:checked + .toggle-slider.green-toggle::after {
+            background: var(--green); box-shadow: 0 0 5px var(--green);
         }
 
         .ms-tags {
@@ -620,71 +646,83 @@
         </div>
     </div>
 
-    <!-- TOP BAR -->
-    <header class="top-bar">
-        <div class="top-bar-left">
-            <div class="top-bar-icon">
-                <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+    <!-- APP CONTAINER -->
+    <div class="app-container">
+        <!-- SIDEBAR -->
+        <aside class="sidebar">
+            <div style="padding: 0 24px 30px; display:flex; align-items:center; gap:12px; border-bottom: 1px solid var(--border); margin-bottom: 20px;">
+                <svg viewBox="0 0 24 24" style="width:24px; height:24px; fill:var(--cyan); filter:drop-shadow(0 0 8px rgba(0,255,255,0.5));"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+                <div style="font-family:'Fira Code', monospace; font-size:1rem; font-weight:bold; color:var(--cyan); letter-spacing:2px; text-shadow:var(--glow-cyan);">RADAR_OS</div>
             </div>
-            <span class="top-bar-title">KULE RADAR</span>
-            <span class="badge">ADMİN</span>
-        </div>
-        <div class="top-bar-right">
-            <button class="btn btn-ghost btn-sm" onclick="A.showChangePwd()">🔑 ŞİFRE</button>
-            <button class="btn btn-ghost btn-sm" onclick="A.logout()">ÇIKIŞ</button>
-            <a href="/static/index.html" target="_blank" class="btn btn-ghost btn-sm">◉ TV EKRANI</a>
-        </div>
-    </header>
+            <button class="sidebar-btn active" onclick="A.switchTab('secProjects', this)">🚀 PROJELER</button>
+            <button class="sidebar-btn" onclick="A.switchTab('secEmployees', this)">👤 PERSONEL</button>
+            <button class="sidebar-btn" onclick="A.switchTab('secHeroes', this)">🏆 KAHRAMANLAR</button>
+        </aside>
 
-    <main class="main" id="main">
-
-        <!-- ═══ PERSONEL ═══ -->
-        <div class="section" id="secEmployees">
-            <div class="sec-head">
-                <div class="sec-title">
-                    ◆ PERSONEL HAVUZU
-                    <span class="sec-count" id="empCount">0</span>
+        <!-- MAIN WRAPPER -->
+        <div class="main-wrapper">
+            <!-- TOP BAR -->
+            <header class="top-bar">
+                <div class="top-bar-left">
+                    <span class="badge" style="margin-left: 0;">ADMİN OTO.</span>
                 </div>
-                <button class="btn btn-cyan btn-sm" onclick="A.addEmployee()">+ YENİ PERSONEL</button>
-            </div>
-            <div class="panel" id="empPanel">
-                <div id="empList"></div>
-            </div>
-        </div>
-
-        <!-- ═══ PROJELER ═══ -->
-        <div class="section" id="secProjects">
-            <div class="sec-head">
-                <div class="sec-title">
-                    ◆ AKTİF PROJELER
-                    <span class="sec-count" id="projCount">0</span>
+                <div class="top-bar-right">
+                    <button class="btn btn-ghost btn-sm" onclick="A.showChangePwd()">🔑 ŞİFRE</button>
+                    <button class="btn btn-ghost btn-sm" onclick="A.logout()">ÇIKIŞ</button>
+                    <a href="/static/index.html" target="_blank" class="btn btn-ghost btn-sm">◉ TV EKRANI</a>
                 </div>
-                <button class="btn btn-cyan btn-sm" onclick="A.addProject()">+ YENİ PROJE</button>
-            </div>
-            <div id="projList"></div>
-        </div>
+            </header>
 
-        <!-- ═══ KAHRAMANLAR ═══ -->
-        <div class="section" id="secHeroes">
-            <div class="sec-head">
-                <div class="sec-title">
-                    ◆ MUTFAK KAHRAMANLARI
-                    <span class="sec-count" id="heroCount">0</span>
+            <main class="main" id="main">
+                <!-- ═══ PROJELER ═══ -->
+                <div class="section active" id="secProjects">
+                    <div class="sec-head">
+                        <div class="sec-title">
+                            ◆ AKTİF PROJELER
+                            <span class="sec-count" id="projCount">0</span>
+                        </div>
+                        <button class="btn btn-cyan btn-sm" onclick="A.addProject()">+ YENİ PROJE</button>
+                    </div>
+                    <div id="projList"></div>
                 </div>
-                <button class="btn btn-cyan btn-sm" onclick="A.addHero()">+ YENİ KAHRAMAN</button>
-            </div>
-            <div class="panel" id="heroPanel">
-                <div id="heroList"></div>
-            </div>
-        </div>
-    </main>
 
-    <!-- SAVE BAR -->
-    <div class="save-bar">
-        <div class="save-info" id="saveInfo">SYS::BOOT</div>
-        <div class="save-actions">
-            <button class="btn btn-ghost btn-sm" onclick="A.reload()">↻ YENİLE</button>
-            <button class="btn btn-green" onclick="A.save()">▶ KAYDET</button>
+                <!-- ═══ PERSONEL ═══ -->
+                <div class="section" id="secEmployees">
+                    <div class="sec-head">
+                        <div class="sec-title">
+                            ◆ PERSONEL HAVUZU
+                            <span class="sec-count" id="empCount">0</span>
+                        </div>
+                        <button class="btn btn-cyan btn-sm" onclick="A.addEmployee()">+ YENİ PERSONEL</button>
+                    </div>
+                    <div class="panel" id="empPanel">
+                        <div id="empList"></div>
+                    </div>
+                </div>
+
+                <!-- ═══ KAHRAMANLAR ═══ -->
+                <div class="section" id="secHeroes">
+                    <div class="sec-head">
+                        <div class="sec-title">
+                            ◆ MUTFAK KAHRAMANLARI
+                            <span class="sec-count" id="heroCount">0</span>
+                        </div>
+                        <button class="btn btn-cyan btn-sm" onclick="A.addHero()">+ YENİ KAHRAMAN</button>
+                    </div>
+                    <div class="panel" id="heroPanel">
+                        <div id="heroList"></div>
+                    </div>
+                </div>
+            </main>
+
+            <!-- SAVE BAR -->
+            <div class="save-bar" style="position: sticky; bottom: 0; z-index: 200;">
+                <div class="save-info" id="saveInfo">SYS::BOOT</div>
+                <div class="save-actions">
+                    <button class="btn btn-ghost btn-sm" onclick="A.reload()">↻ YENİLE</button>
+                    <button class="btn btn-green" onclick="A.save()">▶ KAYDET</button>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -905,6 +943,7 @@
                     progress: parseInt(panel.querySelector(".p-progress").value) || 0,
                     status: panel.querySelector(".p-status").value,
                     is_in_installation: panel.querySelector(".p-is-inst").checked,
+                    is_completed: panel.querySelector(".p-is-comp").checked,
                     team_ids: teamIds,
                     installation_team_ids: instTeamIds
                 });
@@ -1045,12 +1084,18 @@
                             </div>
                         </div>
 
-                        <!-- SAHA KURULUMU EKLENTİSİ -->
-                        <div class="form-group full" style="margin-top:10px;">
+                        <!-- SAHA KURULUMU VE TAMAMLANMA -->
+                        <div class="form-group full" style="margin-top:10px; display:flex; flex-direction:row; gap:30px; flex-wrap:wrap;">
                             <label class="cyber-toggle" for="inst-${i}">
                                 <input type="checkbox" class="p-is-inst" id="inst-${i}" ${isInst ? 'checked' : ''} onchange="A.toggleInstMode(${i}, this.checked)">
                                 <span class="toggle-slider"></span>
                                 <span class="form-label" style="margin:0; font-size:0.8rem; color:var(--orange); cursor:pointer;">SAHA KURULUMU AKTİF</span>
+                            </label>
+
+                            <label class="cyber-toggle" for="comp-${i}">
+                                <input type="checkbox" class="p-is-comp" id="comp-${i}" ${p.is_completed ? 'checked' : ''} onchange="A.toggleCompMode(${i}, this.checked)">
+                                <span class="toggle-slider green-toggle"></span>
+                                <span class="form-label" style="margin:0; font-size:0.8rem; color:var(--green); cursor:pointer;">KURULUM TAMAMLANDI (BAŞARI)</span>
                             </label>
                         </div>
                         <div class="form-group full inst-team-group" style="${isInst ? 'display:block;' : 'display:none;'}">
@@ -1206,7 +1251,22 @@
         function toggleInstMode(projIdx, isChecked) {
             syncFromDom();
             data.active_projects[projIdx].is_in_installation = isChecked;
+            if(isChecked) data.active_projects[projIdx].is_completed = false;
             renderProjects();
+        }
+
+        function toggleCompMode(projIdx, isChecked) {
+            syncFromDom();
+            data.active_projects[projIdx].is_completed = isChecked;
+            if(isChecked) data.active_projects[projIdx].is_in_installation = false;
+            renderProjects();
+        }
+
+        function switchTab(targetId, btnEl) {
+            document.querySelectorAll(".sidebar-btn").forEach(b => b.classList.remove("active"));
+            btnEl.classList.add("active");
+            document.querySelectorAll(".section").forEach(s => s.classList.remove("active"));
+            document.getElementById(targetId).classList.add("active");
         }
 
         /* ══ Sync DOM → data ═════════════ */
@@ -1357,7 +1417,7 @@
             addProject, removeProject,
             addHero, removeHero,
             openTeamModal, closeTeamModal, filterTeamModal, toggleModalTeam, unselectTeam,
-            toggleInstMode,
+            toggleInstMode, toggleCompMode, switchTab,
             uploadPhoto, slideLbl
         };
     })();

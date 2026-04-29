@@ -78,6 +78,52 @@
         /* Anti-Shifting Fixed Digits for Orbitron */
         .digit { display: inline-block; width: 0.85em; text-align: center; }
         .colon { display: inline-block; width: 0.4em; text-align: center; }
+
+        /* Radar Analog Clock */
+        .radar-clock-wrapper {
+            position: relative; width: 100%; max-width: 800px; max-height: 75vh; aspect-ratio: 1; margin: 0 auto;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(34, 211, 238, 0.05) 0%, rgba(2, 6, 23, 0.9) 70%);
+            border: 2px solid rgba(34, 211, 238, 0.3);
+            box-shadow: 0 0 40px rgba(34, 211, 238, 0.1), inset 0 0 40px rgba(34, 211, 238, 0.1);
+        }
+        .radar-grid {
+            position: absolute; inset: 0; border-radius: 50%;
+            background-image: linear-gradient(rgba(34, 211, 238, 0.15) 1px, transparent 1px),
+                              linear-gradient(90deg, rgba(34, 211, 238, 0.15) 1px, transparent 1px);
+            background-size: 60px 60px; background-position: center; overflow: hidden;
+        }
+        .radar-circle {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            border: 1px dashed rgba(34, 211, 238, 0.3); border-radius: 50%;
+        }
+        .radar-circle.c1 { width: 33%; height: 33%; }
+        .radar-circle.c2 { width: 66%; height: 66%; border-style: solid; border-width: 2px; border-color: rgba(34, 211, 238, 0.4); }
+        .radar-circle.c3 { width: 95%; height: 95%; }
+        .radar-sweep {
+            position: absolute; inset: 0; border-radius: 50%;
+            background: conic-gradient(from 0deg, transparent 0deg, rgba(34, 211, 238, 0.05) 270deg, rgba(34, 211, 238, 0.4) 360deg);
+        }
+        .clock-hand {
+            position: absolute; bottom: 50%; left: 50%; transform-origin: bottom center;
+            border-radius: 4px; z-index: 10;
+        }
+        .hand-hour { width: 6px; height: 25%; background: #ffffff; margin-left: -3px; box-shadow: 0 0 10px rgba(255, 255, 255, 0.8); }
+        .hand-minute { width: 4px; height: 38%; background: #22d3ee; margin-left: -2px; box-shadow: 0 0 10px rgba(34, 211, 238, 0.8); }
+        .hand-second { width: 2px; height: 48%; background: #f97316; margin-left: -1px; box-shadow: 0 0 10px rgba(249, 115, 22, 0.8); }
+        .clock-center {
+            position: absolute; top: 50%; left: 50%; width: 16px; height: 16px; margin-top: -8px; margin-left: -8px;
+            background: #ffffff; border-radius: 50%; box-shadow: 0 0 15px #ffffff; z-index: 20;
+        }
+        .radar-mark {
+            position: absolute; font-family: 'Orbitron', sans-serif; color: rgba(34, 211, 238, 0.9);
+            font-size: 2.2rem; font-weight: 700; text-shadow: 0 0 10px rgba(34, 211, 238, 0.5);
+            transform: translate(-50%, -50%);
+        }
+        .mark-12 { top: 8%; left: 50%; }
+        .mark-3 { top: 50%; left: 92%; }
+        .mark-6 { top: 92%; left: 50%; }
+        .mark-9 { top: 50%; left: 8%; }
     </style>
 </head>
 <body class="min-h-screen lg:h-screen w-full text-white flex flex-col">
@@ -152,8 +198,8 @@
         "use strict";
 
         const i18n = {
-            tr: { countdown: "GERİ SAYIM", daysLeft: "GÜN KALDI", progress: "PROJE İLERLEMESİ", heroes: "MUTFAK KAHRAMANLARI", subtitle: "Bu Ayın Operasyon Yıldızları", live: "CANLI", active: "● AKTİF", risk: "▲ RİSKTE", expired: "SÜRE DOLDU", unknown: "Bilinmiyor", noData: "[ VERİ BEKLENİYOR ]", radar: "RADAR ÖZETİ", fieldOpsTitle: "⚡ SAHA KURULUMU DEVAM EDİYOR", fieldOpsMsg: "Sahadaki ekibimize operasyonda başarılar dileriz." },
-            en: { countdown: "COUNTDOWN", daysLeft: "DAYS LEFT", progress: "PROJECT PROGRESS", heroes: "KITCHEN HEROES", subtitle: "Operation Stars of the Month", live: "LIVE", active: "● ACTIVE", risk: "▲ AT RISK", expired: "TIME UP", unknown: "Unknown", noData: "[ WAITING FOR DATA ]", radar: "RADAR SUMMARY", fieldOpsTitle: "⚡ FIELD INSTALLATION IN PROGRESS", fieldOpsMsg: "We wish our field team success in the operation." }
+            tr: { countdown: "GERİ SAYIM", daysLeft: "GÜN KALDI", progress: "PROJE İLERLEMESİ", heroes: "MUTFAK KAHRAMANLARI", subtitle: "Bu Ayın Operasyon Yıldızları", live: "CANLI", active: "● AKTİF", risk: "▲ RİSKTE", expired: "SÜRE DOLDU", unknown: "Bilinmiyor", noData: "[ VERİ BEKLENİYOR ]", radar: "RADAR ÖZETİ", fieldOpsTitle: "⚡ SAHA KURULUMU DEVAM EDİYOR", fieldOpsMsg: "Sahadaki ekibimize operasyonda başarılar dileriz.", successTitle: "🎯 OPERASYON BAŞARIYLA TAMAMLANDI!", successMsg: "Bu büyük başarıda emeği geçen tüm ekibimizi tebrik ederiz.", timeSyncTitle: "SİSTEM ZAMAN SENKRONİZASYONU" },
+            en: { countdown: "COUNTDOWN", daysLeft: "DAYS LEFT", progress: "PROJECT PROGRESS", heroes: "KITCHEN HEROES", subtitle: "Operation Stars of the Month", live: "LIVE", active: "● ACTIVE", risk: "▲ AT RISK", expired: "TIME UP", unknown: "Unknown", noData: "[ WAITING FOR DATA ]", radar: "RADAR SUMMARY", fieldOpsTitle: "⚡ FIELD INSTALLATION IN PROGRESS", fieldOpsMsg: "We wish our field team success in the operation.", successTitle: "🎯 OPERATION COMPLETED SUCCESSFULLY!", successMsg: "Congratulations to our entire team for this great achievement.", timeSyncTitle: "SYSTEM TIME SYNCHRONIZATION" }
         };
         let currentLang = 'tr';
 
@@ -245,6 +291,19 @@
                     max++;
                 });
 
+                // Clock Sync Slide
+                const clockSlide = document.createElement("div");
+                clockSlide.className = "slide flex flex-col justify-start lg:justify-center w-full h-full pt-4 lg:pt-8 pr-2";
+                clockSlide.dataset.lang = lang;
+                clockSlide.dataset.duration = "30000";
+                clockSlide.innerHTML = mkClockInner(lang);
+                $stage.appendChild(clockSlide);
+
+                const cDot = document.createElement("div");
+                cDot.className = "nav-dot h-3 w-3 bg-orange-600 rounded-full mb-1 border border-orange-800";
+                $nav.appendChild(cDot);
+                max++;
+
                 // Radar slide for summary
                 const radarSlide = document.createElement("div");
                 radarSlide.className = "slide flex flex-col justify-start lg:justify-center w-full h-full pt-4 lg:pt-8 pr-2";
@@ -265,11 +324,14 @@
             const t = i18n[lang];
             const pct = p.progress || 0;
             const risk = p.status === "at_risk";
+            const isComp = p.is_completed || false;
             
+            let displayPct = isComp ? 100 : pct;
             let barBg = "bg-cyan-500 glow-cyan";
             let pctText = "text-cyan-400";
-            if (pct >= 70) { barBg = "bg-green-500 glow-green"; pctText = "text-green-400"; }
-            if (risk) { barBg = "bg-orange-500 glow-orange"; pctText = "text-orange-400"; }
+            
+            if (isComp || pct >= 70) { barBg = "bg-green-500 glow-green"; pctText = "text-green-400"; }
+            if (risk && !isComp) { barBg = "bg-orange-500 glow-orange"; pctText = "text-orange-400"; }
             
             const days = calcDays(p.deadline);
             let timeCls = "text-green-400 text-3xl md:text-5xl lg:text-6xl";
@@ -312,10 +374,10 @@
                 <div class="w-full flex flex-col gap-3 lg:gap-5 mt-2 lg:mt-4 shrink-0">
                     <div class="flex justify-between items-end w-full">
                         <span class="font-mono text-xl md:text-2xl lg:text-3xl text-slate-100 tracking-widest">${t.progress}</span>
-                        <span class="font-orbitron text-4xl md:text-5xl lg:text-7xl font-black ${pctText}">%${pct}</span>
+                        <span class="font-orbitron text-4xl md:text-5xl lg:text-7xl font-black ${pctText}">%${displayPct}</span>
                     </div>
                     <div class="w-full h-8 lg:h-12 bg-slate-900 rounded-full relative overflow-hidden border border-slate-700">
-                        <div class="h-full ${barBg} relative transition-all duration-1000 ease-out" style="width: ${pct}%">
+                        <div class="h-full ${barBg} relative transition-all duration-1000 ease-out" style="width: ${displayPct}%">
                             <div class="absolute inset-0 prog-stripes"></div>
                         </div>
                     </div>
@@ -324,17 +386,16 @@
                 
                 <!-- 4. Satır: Geri Sayım & Avatarlar -->
                 <div class="flex flex-col xl:flex-row gap-4 lg:gap-6 items-start mt-2 lg:mt-4 w-full flex-1 min-h-0 pb-2">
-                    <!-- Geri Sayım & Saha Kurulumu -->
+                    <!-- Geri Sayım & Saha Kurulumu & Tamamlandı -->
                     <div class="flex flex-col gap-4 w-full xl:w-1/3 xl:min-w-[360px] shrink-0">
-                        ${!p.is_in_installation ? `
-                        <!-- Geri Sayım -->
-                        <div class="bg-slate-800/80 border border-slate-700 p-4 lg:p-6 rounded-2xl flex flex-col items-center justify-center">
-                            <span class="font-mono text-base lg:text-xl text-slate-100 uppercase tracking-widest mb-2">${t.countdown}</span>
-                            <div class="font-orbitron font-black uppercase ${timeCls} text-center">
-                                ${timeText}
-                            </div>
+                        ${isComp ? `
+                        <!-- Kutlama Paneli -->
+                        <div class="bg-green-900/30 border-2 border-green-500 shadow-[0_0_30px_rgba(34,197,94,0.3)] p-8 lg:p-12 rounded-2xl flex flex-col items-center justify-center w-full flex-1 min-h-[220px] relative overflow-hidden">
+                            <div class="absolute inset-0 bg-green-500/10 pulse-live"></div>
+                            <span class="relative z-10 font-orbitron font-bold text-2xl lg:text-4xl text-green-400 mb-4 text-center uppercase tracking-wider drop-shadow-md">${t.successTitle}</span>
+                            <span class="relative z-10 font-mono text-lg lg:text-2xl text-slate-100 text-center font-bold drop-shadow-sm">${t.successMsg}</span>
                         </div>
-                        ` : `
+                        ` : (p.is_in_installation ? `
                         <!-- Saha Kurulumu Modülü -->
                         <div class="bg-orange-900/30 border border-orange-500 p-8 lg:p-12 rounded-2xl flex flex-col items-center justify-center w-full flex-1 min-h-[220px]">
                             <span class="font-orbitron font-bold text-2xl lg:text-4xl text-orange-400 mb-3 text-center uppercase tracking-wider">${t.fieldOpsTitle}</span>
@@ -348,7 +409,15 @@
                                 `).join("") }
                             </div>
                         </div>
-                        `}
+                        ` : `
+                        <!-- Geri Sayım -->
+                        <div class="bg-slate-800/80 border border-slate-700 p-4 lg:p-6 rounded-2xl flex flex-col items-center justify-center">
+                            <span class="font-mono text-base lg:text-xl text-slate-100 uppercase tracking-widest mb-2">${t.countdown}</span>
+                            <div class="font-orbitron font-black uppercase ${timeCls} text-center">
+                                ${timeText}
+                            </div>
+                        </div>
+                        `)}
                     </div>
 
                     <!-- Personeller -->
@@ -406,6 +475,65 @@
             `;
         }
 
+        function mkClockInner(lang) {
+            return `
+                <div class="flex-1 flex flex-col items-center justify-center w-full pb-8 gap-10 lg:gap-14">
+                    <div class="radar-clock-wrapper">
+                        <div class="radar-grid"></div>
+                        <div class="radar-circle c1"></div>
+                        <div class="radar-circle c2"></div>
+                        <div class="radar-circle c3"></div>
+                        
+                        <div class="radar-sweep clock-anim-sweep"></div>
+                        
+                        <div class="radar-mark mark-12">12</div>
+                        <div class="radar-mark mark-3">03</div>
+                        <div class="radar-mark mark-6">06</div>
+                        <div class="radar-mark mark-9">09</div>
+                        
+                        <div class="clock-hand hand-hour clock-anim-h"></div>
+                        <div class="clock-hand hand-minute clock-anim-m"></div>
+                        <div class="clock-hand hand-second clock-anim-s"></div>
+                        
+                        <div class="clock-center"></div>
+                    </div>
+                    
+                    <div class="radar-date-text font-mono text-2xl lg:text-4xl font-bold bg-cyan-900/30 text-cyan-300 px-6 lg:px-10 py-3 lg:py-4 tracking-widest rounded-xl uppercase border border-cyan-500/30 shadow-[0_0_20px_rgba(34,211,238,0.2)]" data-lang="${lang}">
+                        -- ---- ---- // ---------
+                    </div>
+                </div>
+            `;
+        }
+
+        function animateClock() {
+            const now = new Date();
+            const ms = now.getMilliseconds();
+            const s = now.getSeconds();
+            const m = now.getMinutes();
+            const h = now.getHours() % 12;
+
+            // Milisaniye hassasiyetinde akıcı dönüş (60 FPS)
+            const sDeg = (s + ms / 1000) * 6;
+            const mDeg = (m + s / 60) * 6;
+            const hDeg = (h + m / 60) * 30;
+
+            document.querySelectorAll(".clock-anim-sweep").forEach(el => el.style.transform = `rotate(${sDeg}deg)`);
+            document.querySelectorAll(".clock-anim-h").forEach(el => el.style.transform = `rotate(${hDeg}deg)`);
+            document.querySelectorAll(".clock-anim-m").forEach(el => el.style.transform = `rotate(${mDeg}deg)`);
+            document.querySelectorAll(".clock-anim-s").forEach(el => el.style.transform = `rotate(${sDeg}deg)`);
+
+            document.querySelectorAll(".radar-date-text").forEach(el => {
+                const l = el.dataset.lang || 'tr';
+                const M = l === "tr" ? MN_TR : MN_EN;
+                const D = l === "tr" ? DN_TR : DN_EN;
+                el.textContent = `${now.getDate()} ${M[now.getMonth()]} ${now.getFullYear()} // ${D[now.getDay()]}`;
+            });
+
+            requestAnimationFrame(animateClock);
+        }
+        // Saati başlat
+        requestAnimationFrame(animateClock);
+
         function go(i) {
             const ss = $stage.querySelectorAll(".slide");
             const ds = $nav.querySelectorAll(".nav-dot");
@@ -438,8 +566,21 @@
             tick();
         }
 
-        function nxt() { if(max<=1) return; idx=(idx+1)%max; go(idx); }
-        function resetTmr() { if(tmr) clearInterval(tmr); tmr=setInterval(nxt, SL_MS); }
+        function nxt() { 
+            if(max<=1) return; 
+            idx=(idx+1)%max; 
+            go(idx); 
+            resetTmr(); 
+        }
+        function resetTmr() { 
+            if(tmr) clearTimeout(tmr); 
+            let duration = SL_MS;
+            const activeSlide = $stage.querySelectorAll(".slide")[idx];
+            if (activeSlide && activeSlide.dataset.duration) {
+                duration = parseInt(activeSlide.dataset.duration, 10);
+            }
+            tmr = setTimeout(nxt, duration); 
+        }
 
         /* ── Heroes ────────────── */
         function renderHeroes() {
